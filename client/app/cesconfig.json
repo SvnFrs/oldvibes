@@ -1,0 +1,36 @@
+{
+  "cesVersion": "2.18.3",
+  "projectName": "app",
+  "packages": [
+    {
+      "name": "expo-router",
+      "type": "navigation",
+      "options": {
+        "type": "tabs"
+      }
+    },
+    {
+      "name": "nativewind",
+      "type": "styling"
+    }
+  ],
+  "flags": {
+    "noGit": false,
+    "noInstall": false,
+    "overwrite": false,
+    "importAlias": true,
+    "packageManager": "bun",
+    "eas": false,
+    "publish": false
+  },
+  "packageManager": {
+    "type": "bun",
+    "version": "1.2.16"
+  },
+  "os": {
+    "type": "Linux",
+    "platform": "linux",
+    "arch": "x64",
+    "kernelVersion": "6.15.2-zen1-1-zen"
+  }
+}
