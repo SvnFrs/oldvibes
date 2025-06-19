@@ -7,9 +7,13 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { setupSwagger } from "./config/swagger.config";
 import authRoutes from "./routes/auth.routes";
+import vibeRoutes from "./routes/vibe.routes";
+import { setupCronJobs } from "./job/cleanup.job";
 
 // Load environment variables
 dotenv.config();
+
+setupCronJobs();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -63,6 +67,7 @@ app.get("/health", (req, res) => {
 
 // API Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/vibes", vibeRoutes);
 
 // Setup Swagger documentation
 setupSwagger(app);
@@ -102,6 +107,7 @@ const startServer = async () => {
       console.log(`📚 API Documentation: http://localhost:${PORT}/api-docs`);
       console.log(`🏥 Health Check: http://localhost:${PORT}/health`);
       console.log(`🔐 Auth Routes: http://localhost:${PORT}/api/auth/*`);
+      console.log(`🌊 Vibe Routes: http://localhost:${PORT}/api/vibes/*`);
     });
   } catch (error) {
     console.error("Failed to start server:", error);
