@@ -48,6 +48,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       userId: newUser._id!.toString(),
       email: newUser.email,
       username: newUser.username,
+      role: newUser.role,
     });
 
     // set http-only cookie
@@ -90,6 +91,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       userId: user._id!.toString(),
       email: user.email,
       username: user.username,
+      role: user.role,
     });
 
     // set http-only cookie
