@@ -1,4 +1,6 @@
 import express from "express";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import mongoose from "mongoose";
@@ -11,6 +13,15 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
+
+// Security middlewares
+app.use(helmet());
+app.use(
+  rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+  }),
+);
 
 // Middleware
 app.use(
