@@ -4,7 +4,7 @@ export interface IMessage extends Document {
   conversationId: string;
   senderId: mongoose.Types.ObjectId;
   receiverId: mongoose.Types.ObjectId;
-  postId?: mongoose.Types.ObjectId;
+  vibeId?: mongoose.Types.ObjectId;
   content: string;
   messageType: "text" | "image" | "offer";
   isRead: boolean;
@@ -16,7 +16,7 @@ const messageSchema = new Schema<IMessage>(
     conversationId: { type: String, required: true },
     senderId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     receiverId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    postId: { type: Schema.Types.ObjectId, ref: "Vibe" },
+    vibeId: { type: Schema.Types.ObjectId, ref: "Vibe" },
     content: { type: String, required: true },
     messageType: {
       type: String,

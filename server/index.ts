@@ -10,6 +10,11 @@ import authRoutes from "./routes/auth.routes";
 import vibeRoutes from "./routes/vibe.routes";
 import { setupCronJobs } from "./job/cleanup.job";
 
+import "./schema/user.schema";
+import "./schema/vibe.schema";
+import "./schema/comment.schema";
+import "./schema/message.schema";
+
 // Load environment variables
 dotenv.config();
 

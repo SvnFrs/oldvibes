@@ -1,7 +1,7 @@
 import mongoose, { Document, Schema } from "mongoose";
 
 export interface IComment extends Document {
-  postId: mongoose.Types.ObjectId;
+  vibeId: mongoose.Types.ObjectId;
   userId: mongoose.Types.ObjectId;
   content: string;
   parentComment?: mongoose.Types.ObjectId;
@@ -12,7 +12,7 @@ export interface IComment extends Document {
 
 const commentSchema = new Schema<IComment>(
   {
-    postId: { type: Schema.Types.ObjectId, ref: "Vibe", required: true },
+    vibeId: { type: Schema.Types.ObjectId, ref: "Vibe", required: true },
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     content: { type: String, required: true, maxlength: 300 },
     parentComment: { type: Schema.Types.ObjectId, ref: "Comment" },

@@ -1,4 +1,4 @@
-import { Post, type IVibe } from "../schema/vibe.schema";
+import { Vibe, type IVibe } from "../schema/vibe.schema";
 import type {
   CreateVibeInput,
   UpdateVibeInput,
@@ -9,7 +9,7 @@ import mongoose from "mongoose";
 
 export class VibeModel {
   async create(userId: string, vibeData: CreateVibeInput): Promise<IVibe> {
-    const vibe = new Post({
+    const vibe = new Vibe({
       ...vibeData,
       userId: new mongoose.Types.ObjectId(userId),
       status: "pending", // All vibes start as pending for moderation
@@ -19,7 +19,7 @@ export class VibeModel {
   }
 
   async getById(vibeId: string, userId?: string): Promise<VibeResponse | null> {
-    const vibe = await Post.findById(vibeId)
+    const vibe = await Vibe.findById(vibeId)
       .populate("userId", "username name profilePicture isVerified")
       .populate("comments")
       .lean();
@@ -35,7 +35,7 @@ export class VibeModel {
     updateData: UpdateVibeInput,
   ): Promise<IVibe | null> {
     // Only allow updates if vibe is pending or user is owner
-    const vibe = await Post.findOneAndUpdate(
+    const vibe = await Vibe.findOneAndUpdate(
       {
         _id: vibeId,
         userId,
@@ -53,7 +53,7 @@ export class VibeModel {
   }
 
   async deleteVibe(vibeId: string, userId: string): Promise<boolean> {
-    const result = await Post.findOneAndDelete({
+    const result = await Vibe.findOneAndDelete({
       _id: vibeId,
       userId,
     });
@@ -87,7 +87,7 @@ export class VibeModel {
       query.expiresAt = { $gt: new Date() }; // Not expired
     }
 
-    const vibes = await Post.find(query)
+    const vibes = await Vibe.find(query)
       .populate("userId", "username name profilePicture isVerified")
       .sort({ createdAt: -1 })
       .limit(50)
@@ -97,7 +97,7 @@ export class VibeModel {
   }
 
   async getPendingVibes(): Promise<VibeResponse[]> {
-    const vibes = await Post.find({ status: "pending" })
+    const vibes = await Vibe.find({ status: "pending" })
       .populate("userId", "username name profilePicture isVerified")
       .sort({ createdAt: 1 }) // Oldest first for fairness
       .lean();
@@ -121,7 +121,7 @@ export class VibeModel {
       updateData.moderationNotes = notes;
     }
 
-    const vibe = await Post.findByIdAndUpdate(vibeId, updateData, {
+    const vibe = await Vibe.findByIdAndUpdate(vibeId, updateData, {
       new: true,
     });
 
@@ -129,7 +129,7 @@ export class VibeModel {
   }
 
   async markAsSold(vibeId: string, userId: string): Promise<boolean> {
-    const result = await Post.findOneAndUpdate(
+    const result = await Vibe.findOneAndUpdate(
       { _id: vibeId, userId, status: "approved" },
       { status: "sold", updatedAt: new Date() },
     );
@@ -138,7 +138,7 @@ export class VibeModel {
   }
 
   async likeVibe(vibeId: string, userId: string): Promise<boolean> {
-    const result = await Post.findByIdAndUpdate(vibeId, {
+    const result = await Vibe.findByIdAndUpdate(vibeId, {
       $addToSet: { likes: userId },
     });
 
@@ -146,7 +146,7 @@ export class VibeModel {
   }
 
   async unlikeVibe(vibeId: string, userId: string): Promise<boolean> {
-    const result = await Post.findByIdAndUpdate(vibeId, {
+    const result = await Vibe.findByIdAndUpdate(vibeId, {
       $pull: { likes: userId },
     });
 
@@ -154,7 +154,7 @@ export class VibeModel {
   }
 
   async incrementViews(vibeId: string): Promise<void> {
-    await Post.findByIdAndUpdate(vibeId, { $inc: { views: 1 } });
+    await Vibe.findByIdAndUpdate(vibeId, { $inc: { views: 1 } });
   }
 
   async addMediaFiles(
@@ -165,7 +165,7 @@ export class VibeModel {
       thumbnail?: string;
     }>,
   ): Promise<IVibe | null> {
-    const vibe = await Post.findByIdAndUpdate(
+    const vibe = await Vibe.findByIdAndUpdate(
       vibeId,
       { $push: { mediaFiles: { $each: mediaFiles } } },
       { new: true },
@@ -175,7 +175,7 @@ export class VibeModel {
   }
 
   async archiveExpiredVibes(): Promise<number> {
-    const result = await Post.updateMany(
+    const result = await Vibe.updateMany(
       {
         status: "approved",
         expiresAt: { $lte: new Date() },
@@ -218,7 +218,7 @@ export class VibeModel {
       searchQuery.$and.push({ price: priceQuery });
     }
 
-    const vibes = await Post.find(searchQuery)
+    const vibes = await Vibe.find(searchQuery)
       .populate("userId", "username name profilePicture isVerified")
       .sort({ createdAt: -1 })
       .limit(50)
@@ -230,7 +230,7 @@ export class VibeModel {
   async getTrendingVibes(): Promise<VibeResponse[]> {
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
-    const vibes = await Post.find({
+    const vibes = await Vibe.find({
       status: "approved",
       expiresAt: { $gt: new Date() },
       createdAt: { $gte: twentyFourHoursAgo },
@@ -255,7 +255,7 @@ export class VibeModel {
       query.expiresAt = { $gt: new Date() };
     }
 
-    const vibes = await Post.find(query)
+    const vibes = await Vibe.find(query)
       .populate("userId", "username name profilePicture isVerified")
       .sort({ createdAt: -1 })
       .lean();

@@ -67,4 +67,4 @@ const vibeSchema = new Schema<IVibe>(
 // Index for expiry and automatic cleanup
 vibeSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
-export const Post = mongoose.model<IVibe>("Vibe", vibeSchema);
+export const Vibe = mongoose.model<IVibe>("Vibe", vibeSchema);
