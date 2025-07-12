@@ -20,3 +20,23 @@ export const validateVibeCreation = (
 
   next();
 };
+
+export const validateProfileUpdate = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { name, bio } = req.body;
+
+  if (name && (typeof name !== "string" || name.trim().length === 0)) {
+    return res.status(400).json({ message: "Name must be a non-empty string" });
+  }
+
+  if (bio && (typeof bio !== "string" || bio.length > 150)) {
+    return res
+      .status(400)
+      .json({ message: "Bio must be 150 characters or less" });
+  }
+
+  next();
+};

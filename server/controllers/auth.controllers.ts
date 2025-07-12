@@ -13,7 +13,7 @@ const getCookieOptions = () => ({
       ? ("none" as const)
       : ("lax" as const),
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-  domain: process.env.NODE_ENV === "production" ? undefined : undefined, // Set your domain in production
+  domain: process.env.NODE_ENV === "production" ? undefined : undefined,
 });
 
 export const register = async (req: Request, res: Response): Promise<void> => {
@@ -56,11 +56,13 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
     res.status(201).json({
       message: "User registered successfully",
+      token, // Send token back to client
       user: {
         id: newUser._id,
         email: newUser.email,
         name: newUser.name,
         username: newUser.username,
+        role: newUser.role,
       },
     });
   } catch (error) {
@@ -99,11 +101,13 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     res.json({
       message: "Login successful",
+      token, // Send token back to client
       user: {
         id: user._id,
         email: user.email,
         name: user.name,
         username: user.username,
+        role: user.role,
       },
     });
   } catch (error) {
@@ -133,5 +137,40 @@ export const me = async (req: Request, res: Response): Promise<void> => {
   } catch (error) {
     console.error("Me endpoint error:", error);
     res.status(500).json({ message: "Error getting user info", error });
+  }
+};
+
+export const refreshToken = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const user = (req as any).user;
+
+    // Generate new token
+    const token = generateToken({
+      userId: user.userId,
+      email: user.email,
+      username: user.username,
+      role: user.role,
+    });
+
+    // Update cookie
+    res.cookie("token", token, getCookieOptions());
+
+    res.json({
+      message: "Token refreshed successfully",
+      token,
+      user: {
+        id: user.userId,
+        email: user.email,
+        username: user.username,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    console.error("Refresh token error:", error);
+    res.status(500).json({ message: "Error refreshing token", error });
   }
 };

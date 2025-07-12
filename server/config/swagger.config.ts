@@ -19,10 +19,17 @@ const options = {
     ],
     components: {
       securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+          description: "Enter JWT token in format: Bearer <token>",
+        },
         cookieAuth: {
           type: "apiKey",
           in: "cookie",
           name: "token",
+          description: "HTTP-only cookie authentication",
         },
       },
     },
@@ -40,6 +47,15 @@ export const setupSwagger = (app: Express): void => {
       explorer: true,
       customCss: ".swagger-ui .topbar { display: none }",
       customSiteTitle: "Old Vibes API Documentation",
+      swaggerOptions: {
+        securityDefinitions: {
+          bearerAuth: {
+            type: "http",
+            scheme: "bearer",
+            bearerFormat: "JWT",
+          },
+        },
+      },
     }),
   );
   console.log("📚 Swagger UI available at /api-docs");

@@ -5,6 +5,7 @@ import type {
   UpdateUserInput,
   UserResponse,
 } from "../types/user.types";
+import mongoose from "mongoose";
 
 export class UserModel {
   async create(userData: RegisterInput): Promise<IUser> {
@@ -150,6 +151,55 @@ export class UserModel {
       followersCount: user.followers.length,
       followingCount: user.following.length,
       isVerified: user.isVerified,
+    }));
+  }
+
+  async isFollowing(userId: string, targetUserId: string): Promise<boolean> {
+    const user = await User.findById(userId).select("following");
+    return user
+      ? user.following.includes(new mongoose.Types.ObjectId(targetUserId))
+      : false;
+  }
+
+  async getFollowers(userId: string): Promise<UserResponse[]> {
+    const user = await User.findById(userId)
+      .populate("followers", "username name profilePicture isVerified bio")
+      .select("followers");
+
+    if (!user) return [];
+
+    return user.followers.map((follower: any) => ({
+      id: follower._id.toString(),
+      email: "", // Don't expose email in follower lists
+      name: follower.name,
+      username: follower.username,
+      role: "",
+      profilePicture: follower.profilePicture,
+      bio: follower.bio,
+      followersCount: 0, // Not needed in lists
+      followingCount: 0,
+      isVerified: follower.isVerified,
+    }));
+  }
+
+  async getFollowing(userId: string): Promise<UserResponse[]> {
+    const user = await User.findById(userId)
+      .populate("following", "username name profilePicture isVerified bio")
+      .select("following");
+
+    if (!user) return [];
+
+    return user.following.map((following: any) => ({
+      id: following._id.toString(),
+      email: "",
+      name: following.name,
+      username: following.username,
+      role: "",
+      profilePicture: following.profilePicture,
+      bio: following.bio,
+      followersCount: 0,
+      followingCount: 0,
+      isVerified: following.isVerified,
     }));
   }
 }

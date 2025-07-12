@@ -31,6 +31,20 @@ export interface UpdateUserInput {
   profilePicture?: string;
 }
 
+export interface ProfileResponse extends UserResponse {
+  isFollowing?: boolean;
+  createdAt?: Date;
+}
+
+export interface UserSearchResult {
+  id: string;
+  username: string;
+  name: string;
+  profilePicture?: string;
+  bio?: string;
+  isVerified: boolean;
+}
+
 export type UserRole = "admin" | "staff" | "user" | "guest";
 
 export interface UserModel extends IUser {}

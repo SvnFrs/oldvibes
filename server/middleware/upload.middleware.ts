@@ -32,3 +32,26 @@ export const uploadToS3 = multer({
     }
   },
 });
+
+export const uploadProfilePicture = multer({
+  storage: multerS3({
+    s3: s3,
+    bucket: process.env.AWS_S3_BUCKET_NAME!,
+    key: (req, file, cb) => {
+      const timestamp = Date.now();
+      const filename = `${timestamp}-${file.originalname}`;
+      cb(null, `profiles/${filename}`);
+    },
+  }),
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB for profile pictures
+  },
+  fileFilter: (req, file, cb) => {
+    // Only allow images for profile pictures
+    if (file.mimetype.startsWith("image/")) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image files are allowed for profile pictures"));
+    }
+  },
+});
