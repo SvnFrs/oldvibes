@@ -19,6 +19,7 @@ export interface IVibe extends Document {
   location?: string;
   likes: mongoose.Types.ObjectId[];
   comments: mongoose.Types.ObjectId[];
+  commentsCount: number;
   views: number;
   expiresAt: Date; // 24-hour expiry
   createdAt: Date;
@@ -55,6 +56,7 @@ const vibeSchema = new Schema<IVibe>(
     location: String,
     likes: [{ type: Schema.Types.ObjectId, ref: "User" }],
     comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
+    commentsCount: { type: Number, default: 0 },
     views: { type: Number, default: 0 },
     expiresAt: {
       type: Date,

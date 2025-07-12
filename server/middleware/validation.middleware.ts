@@ -40,3 +40,49 @@ export const validateProfileUpdate = (
 
   next();
 };
+
+export const validateCommentCreation = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { content, parentCommentId } = req.body;
+
+  if (!content || typeof content !== "string" || content.trim().length === 0) {
+    return res.status(400).json({ message: "Comment content is required" });
+  }
+
+  if (content.trim().length > 500) {
+    return res.status(400).json({
+      message: "Comment content must be 500 characters or less",
+    });
+  }
+
+  if (parentCommentId && typeof parentCommentId !== "string") {
+    return res.status(400).json({ message: "Invalid parent comment ID" });
+  }
+
+  req.body.content = content.trim();
+  next();
+};
+
+export const validateCommentUpdate = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { content } = req.body;
+
+  if (!content || typeof content !== "string" || content.trim().length === 0) {
+    return res.status(400).json({ message: "Comment content is required" });
+  }
+
+  if (content.trim().length > 500) {
+    return res.status(400).json({
+      message: "Comment content must be 500 characters or less",
+    });
+  }
+
+  req.body.content = content.trim();
+  next();
+};
