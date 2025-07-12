@@ -1,6 +1,8 @@
 import type { Request, Response } from "express";
 import { UserModel } from "../models/user.models";
 import { generateToken } from "../utils/jwt.utils";
+import { verificationService } from "../services/verification.services";
+import { emailService } from "../services/email.services";
 import type { LoginCredentials, RegisterInput } from "../types/user.types";
 
 const userModel = new UserModel();
@@ -40,8 +42,15 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // create user
+    // create user (not email verified yet)
     const newUser = await userModel.create({ email, password, name, username });
+
+    // Send verification email
+    await verificationService.sendVerificationEmail(
+      email,
+      name,
+      newUser._id!.toString(),
+    );
 
     // generate jwt token
     const token = generateToken({
@@ -55,15 +64,18 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     res.cookie("token", token, getCookieOptions());
 
     res.status(201).json({
-      message: "User registered successfully",
-      token, // Send token back to client
+      message:
+        "User registered successfully. Please check your email for verification.",
+      token,
       user: {
         id: newUser._id,
         email: newUser.email,
         name: newUser.name,
         username: newUser.username,
         role: newUser.role,
+        isEmailVerified: false,
       },
+      emailSent: true,
     });
   } catch (error) {
     console.error("Registration error:", error);
@@ -101,18 +113,98 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     res.json({
       message: "Login successful",
-      token, // Send token back to client
+      token,
       user: {
         id: user._id,
         email: user.email,
         name: user.name,
         username: user.username,
         role: user.role,
+        isEmailVerified: user.isEmailVerified,
       },
     });
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({ message: "Error logging in", error });
+  }
+};
+
+export const verifyEmail = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const { token } = req.body;
+
+    if (!token) {
+      res.status(400).json({ message: "Verification token is required" });
+      return;
+    }
+
+    const result = await verificationService.verifyEmail(token);
+
+    if (!result.success) {
+      res.status(400).json({ message: result.message });
+      return;
+    }
+
+    // Update user's email verification status
+    await userModel.updateUser(result.userId!, { isEmailVerified: true });
+
+    // Send welcome email
+    const user = await userModel.getById(result.userId!);
+    if (user) {
+      await emailService.sendWelcomeEmail(user.email, user.name);
+    }
+
+    res.json({
+      message: result.message,
+      verified: true,
+    });
+  } catch (error) {
+    console.error("Email verification error:", error);
+    res.status(500).json({ message: "Error verifying email", error });
+  }
+};
+
+export const resendVerification = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      res.status(400).json({ message: "Email is required" });
+      return;
+    }
+
+    const user = await userModel.getByEmail(email);
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    if (user.isEmailVerified) {
+      res.status(400).json({ message: "Email is already verified" });
+      return;
+    }
+
+    await verificationService.sendVerificationEmail(
+      user.email,
+      user.name,
+      user._id!.toString(),
+    );
+
+    res.json({
+      message: "Verification email sent successfully",
+      emailSent: true,
+    });
+  } catch (error) {
+    console.error("Resend verification error:", error);
+    res
+      .status(500)
+      .json({ message: "Error sending verification email", error });
   }
 };
 

@@ -62,6 +62,7 @@ export const getMyProfile = async (
         bio: user.bio,
         followersCount: user.followers.length,
         followingCount: user.following.length,
+        isEmailVerified: user.isEmailVerified,
         isVerified: user.isVerified,
         createdAt: user.createdAt,
       },

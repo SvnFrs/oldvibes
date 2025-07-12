@@ -11,6 +11,7 @@ export interface IUser extends Document {
   followers: mongoose.Types.ObjectId[];
   following: mongoose.Types.ObjectId[];
   isVerified: boolean;
+  isEmailVerified: boolean;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -70,6 +71,10 @@ const userSchema = new Schema<IUser>(
       },
     ],
     isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    isEmailVerified: {
       type: Boolean,
       default: false,
     },

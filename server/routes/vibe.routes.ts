@@ -19,6 +19,7 @@ import { authenticateToken } from "../middleware/auth.middleware";
 import { requireStaff, requireUser } from "../middleware/role.middleware";
 import { validateVibeCreation } from "../middleware/validation.middleware";
 import { uploadToS3 } from "../middleware/upload.middleware";
+import { requireEmailVerification } from "../middleware/emailVerification.middleware";
 import type { RequestHandler } from "../types/handler.types";
 
 const router = Router();
@@ -98,6 +99,7 @@ router.post(
   "/",
   authenticateToken,
   requireUser as RequestHandler,
+  requireEmailVerification,
   validateVibeCreation as RequestHandler,
   createVibe as RequestHandler,
 );
@@ -260,6 +262,7 @@ router.post(
   "/:vibeId/like",
   authenticateToken,
   requireUser as RequestHandler,
+  requireEmailVerification,
   likeVibe,
 );
 router.delete(

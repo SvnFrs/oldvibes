@@ -5,6 +5,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import { redis } from "./config/redis.config";
 import { setupSwagger } from "./config/swagger.config";
 import authRoutes from "./routes/auth.routes";
 import vibeRoutes from "./routes/vibe.routes";
@@ -124,3 +125,8 @@ const startServer = async () => {
 };
 
 startServer();
+
+// Graceful shutdown
+process.on("SIGTERM", () => {
+  redis.disconnect();
+});

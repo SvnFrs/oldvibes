@@ -5,6 +5,8 @@ import {
   logout,
   me,
   refreshToken,
+  verifyEmail,
+  resendVerification,
 } from "../controllers/auth.controllers";
 import { authenticateToken } from "../middleware/auth.middleware";
 
@@ -14,6 +16,18 @@ const router = Router();
  * @swagger
  * components:
  *   schemas:
+ *     VerifyEmailInput:
+ *       type: object
+ *       required: [token]
+ *       properties:
+ *         token: { type: string, description: "Email verification token" }
+ *
+ *     ResendVerificationInput:
+ *       type: object
+ *       required: [email]
+ *       properties:
+ *         email: { type: string, format: email }
+ *
  *     RegisterInput:
  *       type: object
  *       required: [email, password, name, username]
@@ -106,6 +120,41 @@ router.post("/register", register);
  *       401: { description: Invalid credentials }
  */
 router.post("/login", login);
+
+/**
+ * @swagger
+ * /auth/verify-email:
+ *   post:
+ *     summary: Verify email address
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema: { $ref: '#/components/schemas/VerifyEmailInput' }
+ *     responses:
+ *       200: { description: Email verified successfully }
+ *       400: { description: Invalid or expired token }
+ */
+router.post("/verify-email", verifyEmail);
+
+/**
+ * @swagger
+ * /auth/resend-verification:
+ *   post:
+ *     summary: Resend verification email
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema: { $ref: '#/components/schemas/ResendVerificationInput' }
+ *     responses:
+ *       200: { description: Verification email sent }
+ *       404: { description: User not found }
+ *       400: { description: Email already verified }
+ */
+router.post("/resend-verification", resendVerification);
 
 /**
  * @swagger
