@@ -80,16 +80,12 @@ services:
       - NEXT_PUBLIC_API_ENDPOINT=https://api.${ROOT_DOMAIN}
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=oldvibes_networks" # ✅ Use actual network name
+      - "traefik.docker.network=oldvibes_networks"
       - "traefik.constraint=proxy-public"
       - "traefik.http.routers.oldvibes-frontend.rule=Host(`${ROOT_DOMAIN}`)"
-      - "traefik.http.routers.oldvibes-frontend.entrypoints=websecure"
+      - "traefik.http.routers.oldvibes-frontend.entrypoints=web" # ✅ Use web (HTTP) not websecure
       - "traefik.http.services.oldvibes-frontend.loadbalancer.server.port=3000"
-      # HTTP to HTTPS redirect
-      - "traefik.http.routers.oldvibes-frontend-http.rule=Host(`${ROOT_DOMAIN}`)"
-      - "traefik.http.routers.oldvibes-frontend-http.entrypoints=web"
-      - "traefik.http.routers.oldvibes-frontend-http.middlewares=redirect-to-https"
-      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      # ❌ Remove all HTTP redirect middlewares
     networks:
       - oldvibes-networks
     profiles:
@@ -211,17 +207,11 @@ services:
       API_URL: https://api.${ROOT_DOMAIN}
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=oldvibes_networks" # ✅ Use actual network name
+      - "traefik.docker.network=oldvibes_networks"
       - "traefik.constraint=proxy-public"
       - "traefik.http.routers.oldvibes-backend.rule=Host(`api.${ROOT_DOMAIN}`)"
-      - "traefik.http.routers.oldvibes-backend.entrypoints=websecure"
-      # ❌ Remove TLS cert resolver - Cloudflare handles this
+      - "traefik.http.routers.oldvibes-backend.entrypoints=web"
       - "traefik.http.services.oldvibes-backend.loadbalancer.server.port=4000"
-      # HTTP to HTTPS redirect
-      - "traefik.http.routers.oldvibes-backend-http.rule=Host(`api.${ROOT_DOMAIN}`)"
-      - "traefik.http.routers.oldvibes-backend-http.entrypoints=web"
-      - "traefik.http.routers.oldvibes-backend-http.middlewares=redirect-to-https"
-      # CORS middleware
       - "traefik.http.routers.oldvibes-backend.middlewares=cors-headers"
       - "traefik.http.middlewares.cors-headers.headers.accesscontrolallowmethods=GET,OPTIONS,PUT,POST,DELETE,PATCH"
       - "traefik.http.middlewares.cors-headers.headers.accesscontrolallowheaders=*"
