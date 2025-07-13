@@ -10,6 +10,7 @@ services:
     environment:
       - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
     networks:
+      - oldvibes-networks
       - oldvibes-traefik-internal
 
   # Traefik Reverse Proxy (Simplified for Cloudflare Tunnel)
