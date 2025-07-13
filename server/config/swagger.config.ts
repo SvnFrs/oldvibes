@@ -52,13 +52,19 @@ export const setupSwagger = (app: Express): void => {
       customCss: ".swagger-ui .topbar { display: none }",
       customSiteTitle: "Old Vibes API Documentation",
       swaggerOptions: {
-        securityDefinitions: {
-          bearerAuth: {
-            type: "http",
-            scheme: "bearer",
-            bearerFormat: "JWT",
+        servers: [
+          {
+            url: "http://localhost:4000/api",
+            description: "Development server",
           },
-        },
+          {
+            url: "https://api.oldvibes.io.vn/api",
+            description: "Production server",
+          },
+        ],
+        // ✅ Enable the server dropdown
+        showCommonExtensions: true,
+        showExtensions: true,
       },
     }),
   );
