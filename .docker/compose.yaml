@@ -1,5 +1,5 @@
 services:
-  # Cloudflare Tunnel - Add to main network
+  # Cloudflare Tunnel - Fix the service URL
   oldvibes-cloudflare-tunnel:
     container_name: oldvibes-cloudflare-tunnel
     image: cloudflare/cloudflared:latest
@@ -10,8 +10,10 @@ services:
     environment:
       - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
     networks:
-      - oldvibes-networks # ✅ Add this - tunnel needs to reach services
+      - oldvibes-networks
       - oldvibes-traefik-internal
+    depends_on:
+      - oldvibes-traefik # ✅ Add this to ensure Traefik starts first
 
   # Traefik Reverse Proxy - Downgrade to v2.10 or fix v3 config
   oldvibes-traefik:
