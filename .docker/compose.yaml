@@ -12,7 +12,7 @@ services:
     networks:
       - oldvibes-traefik-internal
 
-  # Traefik Reverse Proxy
+  # Traefik Reverse Proxy (Simplified for Cloudflare Tunnel)
   oldvibes-traefik:
     container_name: oldvibes-traefik
     image: traefik:v3.0
@@ -22,27 +22,22 @@ services:
       - "--accesslog=true"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
-      - "--entrypoints.mongodb.address=:27017" # MongoDB TCP entrypoint
+      - "--entrypoints.mongodb.address=:27017"
       - "--api.dashboard=true"
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-      - "--certificatesresolvers.cloudflare.acme.tlschallenge=true"
-      - "--certificatesresolvers.cloudflare.acme.email=${ACME_EMAIL}"
-      - "--certificatesresolvers.cloudflare.acme.storage=/letsencrypt/acme.json"
+      - "--providers.docker.network=oldvibes_networks" # ✅ Fix network issue
       - "--serversTransport.insecureSkipVerify=true"
     ports:
       - "80:80"
       - "443:443"
-      - "8080:8080" # Traefik dashboard
-      - "27017:27017" # MongoDB port
+      - "8080:8080"
+      - "27017:27017"
     profiles:
       - prod
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "traefik-certificates:/letsencrypt"
-    environment:
-      - CF_DNS_API_TOKEN=${CF_API_TOKEN}
     networks:
       - oldvibes-networks
       - oldvibes-traefik-internal
@@ -75,7 +70,7 @@ services:
     profiles:
       - prod
 
-  # Frontend
+  # Frontend (Updated labels)
   oldvibes-frontend:
     container_name: oldvibes-frontend
     image: "${REGISTRY}/oldvibes-frontend:latest"
@@ -84,11 +79,10 @@ services:
       - NEXT_PUBLIC_API_ENDPOINT=https://api.${ROOT_DOMAIN}
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=oldvibes-networks"
+      - "traefik.docker.network=oldvibes_networks" # ✅ Use actual network name
       - "traefik.constraint=proxy-public"
       - "traefik.http.routers.oldvibes-frontend.rule=Host(`${ROOT_DOMAIN}`)"
       - "traefik.http.routers.oldvibes-frontend.entrypoints=websecure"
-      - "traefik.http.routers.oldvibes-frontend.tls.certresolver=cloudflare"
       - "traefik.http.services.oldvibes-frontend.loadbalancer.server.port=3000"
       # HTTP to HTTPS redirect
       - "traefik.http.routers.oldvibes-frontend-http.rule=Host(`${ROOT_DOMAIN}`)"
@@ -100,7 +94,7 @@ services:
     profiles:
       - prod
 
-  # MongoDB Database
+  # MongoDB
   oldvibes-mongo:
     container_name: oldvibes-mongo
     image: "mongo:7-jammy"
@@ -115,12 +109,9 @@ services:
     networks:
       - oldvibes-networks
     labels:
-      # TCP routing for MongoDB
       - "traefik.enable=true"
       - "traefik.tcp.routers.oldvibes-mongo.rule=HostSNI(`db.${ROOT_DOMAIN}`)"
       - "traefik.tcp.routers.oldvibes-mongo.entrypoints=mongodb"
-      - "traefik.tcp.routers.oldvibes-mongo.tls=true"
-      - "traefik.tcp.routers.oldvibes-mongo.tls.certresolver=cloudflare"
       - "traefik.tcp.services.oldvibes-mongo.loadbalancer.server.port=27017"
     healthcheck:
       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
@@ -131,7 +122,7 @@ services:
     profiles:
       - prod
 
-  # Redis for caching and sessions
+  # Redis
   oldvibes-redis:
     container_name: oldvibes-redis
     image: "redis:7-alpine"
@@ -165,7 +156,7 @@ services:
       - prod
       - dev
 
-  # Node.js Backend Application
+  # Backend (Updated labels)
   oldvibes-backend:
     container_name: oldvibes-backend
     image: "${REGISTRY}/oldvibes-backend:latest"
@@ -219,11 +210,11 @@ services:
       API_URL: https://api.${ROOT_DOMAIN}
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=oldvibes-networks"
+      - "traefik.docker.network=oldvibes_networks" # ✅ Use actual network name
       - "traefik.constraint=proxy-public"
       - "traefik.http.routers.oldvibes-backend.rule=Host(`api.${ROOT_DOMAIN}`)"
       - "traefik.http.routers.oldvibes-backend.entrypoints=websecure"
-      - "traefik.http.routers.oldvibes-backend.tls.certresolver=cloudflare"
+      # ❌ Remove TLS cert resolver - Cloudflare handles this
       - "traefik.http.services.oldvibes-backend.loadbalancer.server.port=4000"
       # HTTP to HTTPS redirect
       - "traefik.http.routers.oldvibes-backend-http.rule=Host(`api.${ROOT_DOMAIN}`)"
@@ -261,5 +252,3 @@ volumes:
     name: oldvibes_mongo_config
   redis-data:
     name: oldvibes_redis_data
-  traefik-certificates:
-    name: oldvibes_traefik_certificates
