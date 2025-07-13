@@ -12,8 +12,8 @@ services:
     networks:
       - oldvibes-networks
       - oldvibes-traefik-internal
-    depends_on:
-      - oldvibes-traefik # ✅ Add this to ensure Traefik starts first
+    # depends_on:
+    #   - oldvibes-traefik # ✅ Add this to ensure Traefik starts first
 
   # Traefik Reverse Proxy - Downgrade to v2.10 or fix v3 config
   oldvibes-traefik:
