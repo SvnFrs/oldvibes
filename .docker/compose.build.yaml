@@ -1,0 +1,32 @@
+services:
+  oldvibes-frontend:
+    image: ${REGISTRY}/oldvibes-frontend:latest
+    build:
+      context: ../client/web
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_ENDPOINT=https://api.${ROOT_DOMAIN}
+        - NODE_ENV=production
+      target: production
+      platforms:
+        - linux/amd64
+    environment:
+      - NEXT_PUBLIC_API_ENDPOINT=https://api.${ROOT_DOMAIN}
+    profiles:
+      - build
+      - client
+
+  oldvibes-backend:
+    image: ${REGISTRY}/oldvibes-backend:latest
+    build:
+      context: ../server
+      dockerfile: Dockerfile
+      target: production
+      platforms:
+        - linux/amd64
+      # Build args for optimization
+      args:
+        - NODE_ENV=production
+    profiles:
+      - build
+      - server

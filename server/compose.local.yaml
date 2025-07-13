@@ -1,0 +1,38 @@
+services:
+  oldvibes-mongo-local:
+    container_name: oldvibes-mongo-local
+    image: "mongo:7-jammy"
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: oldvibes
+    volumes:
+      - mongo-data-local:/data/db
+    networks:
+      - oldvibes-local
+
+  oldvibes-redis-local:
+    container_name: oldvibes-redis-local
+    image: "redis:7-alpine"
+    restart: always
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data-local:/data
+    networks:
+      - oldvibes-local
+
+networks:
+  oldvibes-local:
+    name: oldvibes_local
+    driver: bridge
+
+volumes:
+  mongo-data-local:
+    name: oldvibes_mongo_data_local
+  redis-data-local:
+    name: oldvibes_redis_data_local

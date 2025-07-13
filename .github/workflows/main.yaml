@@ -1,0 +1,268 @@
+name: Build and Deploy Old Vibes
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      GIT_REGISTRY: ghcr.io/${{ github.repository }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Convert REGISTRY to lowercase
+        run: echo "REGISTRY=$(echo $GIT_REGISTRY | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      # Clean up untagged images
+      - name: Clean up old images
+        run: |
+          # Get package names
+          FRONTEND_PACKAGE="oldvibes-frontend"
+          BACKEND_PACKAGE="oldvibes-backend"
+
+          # Authenticate with GitHub API
+          echo "Authenticating with GitHub API..."
+          TOKEN="${{ secrets.GITHUB_TOKEN }}"
+          OWNER="${{ github.repository_owner }}"
+          PACKAGE_TYPE="container"
+
+          # Function to clean up package versions
+          cleanup_package() {
+            local package_name=$1
+            echo "Cleaning up package: ${package_name}"
+
+            VERSIONS_URL="https://api.github.com/users/${OWNER}/packages/${PACKAGE_TYPE}/${package_name}/versions"
+            VERSIONS=$(curl -s -H "Authorization: token ${TOKEN}" "${VERSIONS_URL}")
+
+            # Delete untagged versions (keep the latest 5)
+            echo "Finding and deleting old untagged images for ${package_name}..."
+            echo "$VERSIONS" | jq -r '.[] | select(.metadata.container.tags | length == 0) | .id' | tail -n +6 | while read -r VERSION_ID; do
+              if [ ! -z "$VERSION_ID" ]; then
+                echo "Deleting version ${VERSION_ID} from ${package_name}..."
+                curl -s -X DELETE -H "Authorization: token ${TOKEN}" "https://api.github.com/users/${OWNER}/packages/${PACKAGE_TYPE}/${package_name}/versions/${VERSION_ID}"
+              fi
+            done
+          }
+
+          # Clean up both packages
+          cleanup_package $FRONTEND_PACKAGE
+          cleanup_package $BACKEND_PACKAGE
+
+          echo "Image cleanup completed."
+
+      - name: Build and push Docker images
+        run: |
+          # Clean local Docker cache
+          docker system prune -af
+
+          # Export environment variables for the build
+          export ROOT_DOMAIN=${{ secrets.ROOT_DOMAIN }}
+          export REGISTRY=${{ env.REGISTRY }}
+          echo "Using ROOT_DOMAIN=${ROOT_DOMAIN} for build"
+          echo "Using REGISTRY=${REGISTRY} for build"
+
+          # Build and push new images
+          docker compose -f .docker/compose.build.yaml --profile build build --parallel --no-cache
+          docker compose -f .docker/compose.build.yaml --profile build push
+
+      - name: Verify images
+        run: |
+          echo "Verifying built images..."
+          docker images | grep ${{ env.REGISTRY }}
+
+          # Test pull the images to ensure they're properly pushed
+          docker pull ${{ env.REGISTRY }}/oldvibes-frontend:latest
+          docker pull ${{ env.REGISTRY }}/oldvibes-backend:latest
+
+  deploy-website:
+    runs-on: ubuntu-latest
+    needs: build-image
+    env:
+      GIT_REGISTRY: ghcr.io/${{ github.repository }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Convert REGISTRY to lowercase
+        run: echo "REGISTRY=$(echo $GIT_REGISTRY | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      - name: Create GitHub Token File
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" > github_token.txt
+
+      - name: Copy deployment files to EC2
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          source: "github_token.txt,.docker/compose.yaml"
+          target: "~/oldvibes-deployment"
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          script: |
+            # Prepare directory
+            mkdir -p ~/oldvibes-deployment/.docker
+
+            # Pull the latest code
+            cd ~/oldvibes-deployment
+            echo "${{ env.REGISTRY }}" > .registry
+
+            # Store GitHub credentials properly
+            GITHUB_TOKEN=$(cat github_token.txt)
+
+            # Create Docker config directory if it doesn't exist
+            mkdir -p ~/.docker
+
+            # Create proper Docker credential configuration
+            echo "{\"auths\":{\"ghcr.io\":{\"auth\":\"$(echo -n "${{ github.actor }}:${GITHUB_TOKEN}" | base64)\"}}}" > ~/.docker/config.json
+
+            # Secure the token file
+            rm github_token.txt
+
+            # Create/update environment file for Old Vibes
+            cat > .env << EOF
+            REGISTRY=${{ env.REGISTRY }}
+            ROOT_DOMAIN=${{ secrets.ROOT_DOMAIN }}
+            CF_API_TOKEN=${{ secrets.CF_API_TOKEN }}
+            ZONE_ID=${{ secrets.ZONE_ID }}
+            CLOUDFLARE_TUNNEL_TOKEN=${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}
+            ACME_EMAIL=${{ secrets.ACME_EMAIL }}
+
+            # MongoDB Configuration
+            MONGO_ROOT_USERNAME=${{ secrets.MONGO_ROOT_USERNAME }}
+            MONGO_ROOT_PASSWORD=${{ secrets.MONGO_ROOT_PASSWORD }}
+            DB_NAME=${{ secrets.DB_NAME }}
+
+            # Redis Configuration
+            REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+
+            # Application Secrets
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            SESSION_SECRET=${{ secrets.SESSION_SECRET }}
+
+            # AWS S3 Configuration
+            AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            AWS_REGION=${{ secrets.AWS_REGION }}
+            AWS_S3_BUCKET_NAME=${{ secrets.AWS_S3_BUCKET_NAME }}
+
+            # File Upload Settings
+            MAX_FILE_SIZE=${{ secrets.MAX_FILE_SIZE }}
+            ALLOWED_FILE_TYPES=${{ secrets.ALLOWED_FILE_TYPES }}
+
+            # Email Configuration
+            SMTP_HOST=${{ secrets.SMTP_HOST }}
+            SMTP_PORT=${{ secrets.SMTP_PORT }}
+            SMTP_USER=${{ secrets.SMTP_USER }}
+            SMTP_PASS=${{ secrets.SMTP_PASS }}
+            FROM_EMAIL=${{ secrets.FROM_EMAIL }}
+            FROM_NAME=${{ secrets.FROM_NAME }}
+
+            # Database Management (Optional)
+            MONGO_EXPRESS_USER=${{ secrets.MONGO_EXPRESS_USER }}
+            MONGO_EXPRESS_PASSWORD=${{ secrets.MONGO_EXPRESS_PASSWORD }}
+            REDIS_COMMANDER_USER=${{ secrets.REDIS_COMMANDER_USER }}
+            REDIS_COMMANDER_PASSWORD=${{ secrets.REDIS_COMMANDER_PASSWORD }}
+            EOF
+
+            # Also copy environment file to .docker directory for convenience
+            cp .env .docker/.env
+
+            # Login to GitHub Container Registry with proper method
+            echo "${GITHUB_TOKEN}" | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            # Copy docker config to root user for sudo operations
+            sudo mkdir -p /root/.docker
+            sudo cp ~/.docker/config.json /root/.docker/config.json
+
+            # Clean up existing containers and images
+            echo "=== Cleaning up existing resources ==="
+            sudo docker compose -f .docker/compose.yaml --env-file .env --profile prod down || true
+            sudo docker system prune -af
+
+            # Try to pull your images directly to verify they work
+            echo "=== Testing Image Pull ==="
+            sudo docker pull ${REGISTRY}/oldvibes-frontend:latest
+            sudo docker pull ${REGISTRY}/oldvibes-backend:latest
+
+            # Run docker compose with the explicit env-file flag
+            echo "=== Starting Services ==="
+            sudo docker compose -f .docker/compose.yaml --env-file .env --profile prod up -d
+
+            # Wait for services to start
+            sleep 30
+
+            # Check running containers
+            echo "=== Running Containers ==="
+            sudo docker ps
+
+            # Check service health
+            echo "=== Service Health Check ==="
+
+            # Check frontend
+            if sudo docker ps | grep oldvibes-frontend; then
+              echo "✅ Frontend container is running"
+            else
+              echo "❌ Frontend container failed to start - showing logs:"
+              sudo docker logs oldvibes-frontend 2>/dev/null || echo "No logs available"
+            fi
+
+            # Check backend
+            if sudo docker ps | grep oldvibes-backend; then
+              echo "✅ Backend container is running"
+              # Test backend health endpoint
+              sleep 10
+              if curl -f http://localhost:4000/health 2>/dev/null; then
+                echo "✅ Backend health check passed"
+              else
+                echo "⚠️ Backend health check failed - showing logs:"
+                sudo docker logs oldvibes-backend 2>/dev/null || echo "No logs available"
+              fi
+            else
+              echo "❌ Backend container failed to start - showing logs:"
+              sudo docker logs oldvibes-backend 2>/dev/null || echo "No logs available"
+            fi
+
+            # Check databases
+            if sudo docker ps | grep oldvibes-mongo; then
+              echo "✅ MongoDB container is running"
+            else
+              echo "❌ MongoDB container not running"
+            fi
+
+            if sudo docker ps | grep oldvibes-redis; then
+              echo "✅ Redis container is running"
+            else
+              echo "❌ Redis container not running"
+            fi
+
+            # Show final status
+            echo "=== Deployment Summary ==="
+            echo "Frontend URL: https://${{ secrets.ROOT_DOMAIN }}"
+            echo "Backend API: https://api.${{ secrets.ROOT_DOMAIN }}"
+            echo "Database Admin: https://db.${{ secrets.ROOT_DOMAIN }}"
+            echo "Redis Admin: https://redis.${{ secrets.ROOT_DOMAIN }}"
