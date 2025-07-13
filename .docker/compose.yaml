@@ -242,10 +242,6 @@ networks:
   oldvibes-networks:
     name: oldvibes_networks
     driver: bridge
-    ipam:
-      config:
-        - subnet: 172.18.0.0/16
-
   oldvibes-traefik-internal:
     name: oldvibes_traefik_internal
     driver: bridge
