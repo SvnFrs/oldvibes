@@ -166,6 +166,8 @@ services:
     container_name: oldvibes-backend
     image: "${REGISTRY}/oldvibes-backend:latest"
     restart: always
+    ports:
+      - "4000:4000"
     depends_on:
       oldvibes-mongo:
         condition: service_healthy
