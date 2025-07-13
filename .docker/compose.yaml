@@ -12,8 +12,8 @@ services:
     networks:
       - oldvibes-networks
       - oldvibes-traefik-internal
-    # depends_on:
-    #   - oldvibes-traefik # ✅ Add this to ensure Traefik starts first
+    depends_on:
+      - oldvibes-traefik # ✅ Add this to ensure Traefik starts first (Definitely working)
 
   # Traefik Reverse Proxy - Downgrade to v2.10 or fix v3 config
   oldvibes-traefik:
@@ -111,9 +111,13 @@ services:
       - oldvibes-networks
     labels:
       - "traefik.enable=true"
-      - "traefik.tcp.routers.oldvibes-mongo.rule=HostSNI(`db.${ROOT_DOMAIN}`)"
+      - "traefik.docker.network=oldvibes_networks"
+      # ✅ Fix TCP routing
+      - "traefik.tcp.routers.oldvibes-mongo.rule=HostSNI(`*`)" # Accept any SNI
       - "traefik.tcp.routers.oldvibes-mongo.entrypoints=mongodb"
       - "traefik.tcp.services.oldvibes-mongo.loadbalancer.server.port=27017"
+      # ✅ Add service designation
+      - "traefik.tcp.routers.oldvibes-mongo.service=oldvibes-mongo"
     healthcheck:
       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
       interval: 30s
