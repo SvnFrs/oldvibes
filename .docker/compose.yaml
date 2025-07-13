@@ -1,5 +1,5 @@
 services:
-  # Cloudflare Tunnel
+  # Cloudflare Tunnel - Add to main network
   oldvibes-cloudflare-tunnel:
     container_name: oldvibes-cloudflare-tunnel
     image: cloudflare/cloudflared:latest
@@ -10,13 +10,13 @@ services:
     environment:
       - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
     networks:
-      - oldvibes-networks
+      - oldvibes-networks # ✅ Add this - tunnel needs to reach services
       - oldvibes-traefik-internal
 
-  # Traefik Reverse Proxy (Simplified for Cloudflare Tunnel)
+  # Traefik Reverse Proxy - Downgrade to v2.10 or fix v3 config
   oldvibes-traefik:
     container_name: oldvibes-traefik
-    image: traefik:v3.0
+    image: traefik:v2.10 # ✅ Use same version as working project
     restart: always
     command:
       - "--log.level=INFO"
@@ -28,22 +28,24 @@ services:
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-      - "--providers.docker.network=oldvibes_networks" # ✅ Fix network issue
+      - "--providers.docker.network=oldvibes_networks"
       - "--serversTransport.insecureSkipVerify=true"
     ports:
       - "80:80"
       - "443:443"
-      - "8080:8080"
+      - "8080:8080" # ✅ Add dashboard port
       - "27017:27017"
     profiles:
       - prod
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    environment:
+      - CF_DNS_API_TOKEN=${CF_API_TOKEN} # ✅ Add this like fcoder
     networks:
       - oldvibes-networks
       - oldvibes-traefik-internal
 
-  # Cloudflare Companion
+  # Cloudflare Companion - Fix API URL
   oldvibes-cloudflare-companion:
     container_name: oldvibes-cloudflare-companion
     image: ghcr.io/tiredofit/docker-traefik-cloudflare-companion:latest
@@ -53,12 +55,12 @@ services:
       - TIMEZONE=Asia/Ho_Chi_Minh
       - LOG_TYPE=CONSOLE
       - LOG_LEVEL=INFO
-      - TRAEFIK_VERSION=3
+      - TRAEFIK_VERSION=2 # ✅ Change from 3 to 2
       - RC_TYPE=CNAME
       - TARGET_DOMAIN=${ROOT_DOMAIN}
       - REFRESH_ENTRIES=TRUE
       - ENABLE_TRAEFIK_POLL=TRUE
-      - TRAEFIK_POLL_URL=http://oldvibes-traefik:8080/api
+      - TRAEFIK_POLL_URL=http://oldvibes-traefik/api # ✅ Remove :8080
       - TRAEFIK_FILTER_LABEL=traefik.constraint
       - TRAEFIK_FILTER=proxy-public
       - CF_TOKEN=${CF_API_TOKEN}
