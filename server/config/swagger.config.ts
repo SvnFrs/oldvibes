@@ -16,6 +16,10 @@ const options = {
         url: "http://localhost:4000/api",
         description: "Development server",
       },
+      {
+        url: "https://api.oldvibes.io.vn/api",
+        description: "Production server",
+      },
     ],
     components: {
       securitySchemes: {
