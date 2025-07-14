@@ -14,6 +14,7 @@ import vibeRoutes from "./routes/vibe.routes";
 import userRoutes from "./routes/user.routes";
 import commentRoutes from "./routes/comment.routes";
 import chatRoutes from "./routes/chat.routes";
+import adminRoutes from "./routes/admin.routes";
 import { setupCronJobs } from "./job/cleanup.job";
 
 import "./schema/user.schema";
@@ -99,6 +100,7 @@ app.use("/api/vibes", vibeRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api", commentRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/admin", adminRoutes);
 
 // Setup Swagger documentation
 setupSwagger(app);

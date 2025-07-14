@@ -283,7 +283,7 @@ export class VibeModel {
       condition: vibe.condition,
       location: vibe.location,
       likesCount: vibe.likes?.length || 0,
-      commentsCount: vibe.comments?.length || 0,
+      commentsCount: vibe.commentsCount || 0,
       views: vibe.views,
       isLiked: userId ? vibe.likes?.includes(userId) : undefined,
       expiresAt: vibe.expiresAt,

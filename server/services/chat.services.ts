@@ -194,9 +194,10 @@ export class ChatService {
     const hasMore = conversations.length > limit;
     if (hasMore) conversations.pop();
 
-    const formattedConversations = conversations.map((conv: any) =>
-      this.formatConversationResponse(conv, userId),
-    );
+    // Filter out conversations with missing vibe
+    const formattedConversations = conversations
+      .filter((conv: any) => conv.vibeId)
+      .map((conv: any) => this.formatConversationResponse(conv, userId));
 
     return { conversations: formattedConversations, hasMore };
   }

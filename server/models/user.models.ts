@@ -80,27 +80,20 @@ export class UserModel {
   }
 
   async unfollowUser(userId: string, targetUserId: string): Promise<boolean> {
-    const session = await User.startSession();
-    session.startTransaction();
-
     try {
       // Remove from following list
       await User.findByIdAndUpdate(userId, {
         $pull: { following: targetUserId },
-      }).session(session);
+      });
 
       // Remove from followers list
       await User.findByIdAndUpdate(targetUserId, {
         $pull: { followers: userId },
-      }).session(session);
+      });
 
-      await session.commitTransaction();
       return true;
     } catch (error) {
-      await session.abortTransaction();
       throw error;
-    } finally {
-      session.endSession();
     }
   }
 
@@ -201,5 +194,56 @@ export class UserModel {
       followingCount: 0,
       isVerified: following.isVerified,
     }));
+  }
+
+  async createStaff(staffData: {
+    email: string;
+    password: string;
+    name: string;
+    username: string;
+    role: "staff";
+  }): Promise<IUser> {
+    const saltRounds = 12;
+    const hashedPassword = await bcrypt.hash(staffData.password, saltRounds);
+
+    const user = new User({
+      ...staffData,
+      password: hashedPassword,
+      role: "staff",
+      isEmailVerified: true, // Assume staff is trusted
+      isActive: true,
+    });
+
+    return await user.save();
+  }
+
+  // Update staff user (admin only)
+  async updateStaff(
+    staffId: string,
+    updateData: Partial<
+      Pick<IUser, "name" | "email" | "username" | "bio" | "profilePicture">
+    >,
+  ): Promise<IUser | null> {
+    return await User.findOneAndUpdate(
+      { _id: staffId, role: "staff", isActive: true },
+      { ...updateData, updatedAt: new Date() },
+      { new: true, runValidators: true },
+    ).select("-password");
+  }
+
+  // Delete staff user (admin only, soft delete)
+  async deleteStaff(staffId: string): Promise<boolean> {
+    const result = await User.findOneAndUpdate(
+      { _id: staffId, role: "staff", isActive: true },
+      { isActive: false, updatedAt: new Date() },
+    );
+    return !!result;
+  }
+
+  // List all staff (admin only)
+  async listStaff(): Promise<IUser[]> {
+    return await User.find({ role: "staff", isActive: true }).select(
+      "-password",
+    );
   }
 }
