@@ -55,13 +55,13 @@ export default function VerifyEmailContent() {
     switch (status) {
       case "loading":
         return (
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-gruvbox-blue mx-auto mb-4"></div>
         );
       case "success":
         return (
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-gruvbox-green-light dark:bg-gruvbox-green-dark rounded-full flex items-center justify-center mx-auto mb-4">
             <svg
-              className="w-8 h-8 text-green-600"
+              className="w-8 h-8 text-gruvbox-green"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -77,9 +77,9 @@ export default function VerifyEmailContent() {
         );
       case "error":
         return (
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-gruvbox-red-light dark:bg-gruvbox-red-dark rounded-full flex items-center justify-center mx-auto mb-4">
             <svg
-              className="w-8 h-8 text-red-600"
+              className="w-8 h-8 text-gruvbox-red"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -97,19 +97,19 @@ export default function VerifyEmailContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
+    <div className="min-h-screen bg-gruvbox-light-bg0 dark:bg-gruvbox-dark-bg0 flex items-center justify-center p-4">
+      <div className="bg-gruvbox-light-bg1 dark:bg-gruvbox-dark-bg1 rounded-2xl shadow-xl p-8 w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center space-x-3 mb-4">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-600 rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-gruvbox-orange-light dark:bg-gruvbox-orange-dark rounded-xl flex items-center justify-center">
               <span className="text-white font-bold text-lg">🌊</span>
             </div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+            <h1 className="text-2xl font-bold text-gruvbox-orange-light dark:text-gruvbox-orange-dark">
               Old Vibes
             </h1>
           </div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+          <h2 className="text-xl font-semibold text-gruvbox-light-fg1 dark:text-gruvbox-dark-fg1 mb-2">
             Email Verification
           </h2>
         </div>
@@ -121,10 +121,10 @@ export default function VerifyEmailContent() {
           <h3
             className={`text-lg font-semibold mb-3 ${
               status === "success"
-                ? "text-green-700"
+                ? "text-gruvbox-green"
                 : status === "error"
-                  ? "text-red-700"
-                  : "text-gray-700"
+                  ? "text-gruvbox-red"
+                  : "text-gruvbox-gray"
             }`}
           >
             {status === "loading" && "Verifying your email..."}
@@ -135,44 +135,14 @@ export default function VerifyEmailContent() {
           <p
             className={`mb-6 ${
               status === "success"
-                ? "text-green-600"
+                ? "text-gruvbox-green"
                 : status === "error"
-                  ? "text-red-600"
-                  : "text-gray-600"
+                  ? "text-gruvbox-red"
+                  : "text-gruvbox-gray"
             }`}
           >
             {message}
           </p>
-
-          {status === "success" && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-              <h4 className="font-semibold text-green-800 mb-2">
-                Welcome to Old Vibes! 🌊
-              </h4>
-              <p className="text-green-700 text-sm">
-                Your email has been successfully verified. You can now:
-              </p>
-              <ul className="text-green-700 text-sm mt-2 space-y-1">
-                <li>• Post your old vibes for sale</li>
-                <li>• Like and comment on items</li>
-                <li>• Start conversations with sellers</li>
-                <li>• Join our vintage community</li>
-              </ul>
-            </div>
-          )}
-
-          {status === "error" && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-              <h4 className="font-semibold text-red-800 mb-2">
-                What you can do:
-              </h4>
-              <ul className="text-red-700 text-sm space-y-1">
-                <li>• Check if the verification link has expired</li>
-                <li>• Request a new verification email</li>
-                <li>• Contact support if the problem persists</li>
-              </ul>
-            </div>
-          )}
 
           {/* Action Buttons */}
           <div className="space-y-3">
@@ -180,13 +150,13 @@ export default function VerifyEmailContent() {
               <>
                 <Link
                   href="/admin"
-                  className="block w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:shadow-lg transition-all"
+                  className="block w-full bg-gruvbox-orange text-gruvbox-light-bg0 py-3 px-4 rounded-lg font-semibold hover:shadow-lg transition-all"
                 >
                   Access Admin Panel
                 </Link>
                 <Link
                   href="/"
-                  className="block w-full border-2 border-purple-600 text-purple-600 py-3 px-4 rounded-lg font-semibold hover:bg-purple-50 transition-colors"
+                  className="block w-full border-2 border-gruvbox-orange text-gruvbox-orange py-3 px-4 rounded-lg font-semibold hover:bg-gruvbox-orange-light hover:text-gruvbox-light-bg0 transition-colors"
                 >
                   Back to Homepage
                 </Link>
@@ -197,13 +167,13 @@ export default function VerifyEmailContent() {
               <div className="space-y-3">
                 <button
                   onClick={() => window.location.reload()}
-                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:shadow-lg transition-all"
+                  className="w-full bg-gruvbox-orange text-gruvbox-light-bg0 py-3 px-4 rounded-lg font-semibold hover:shadow-lg transition-all"
                 >
                   Try Again
                 </button>
                 <Link
                   href="/"
-                  className="block w-full border-2 border-purple-600 text-purple-600 py-3 px-4 rounded-lg font-semibold hover:bg-purple-50 transition-colors"
+                  className="block w-full border-2 border-gruvbox-orange text-gruvbox-orange py-3 px-4 rounded-lg font-semibold hover:bg-gruvbox-orange-light hover:text-gruvbox-light-bg0 transition-colors"
                 >
                   Back to Homepage
                 </Link>
@@ -211,7 +181,7 @@ export default function VerifyEmailContent() {
             )}
 
             {status === "loading" && (
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-gruvbox-gray">
                 This may take a few seconds...
               </div>
             )}
@@ -219,12 +189,12 @@ export default function VerifyEmailContent() {
         </div>
 
         {/* Support Link */}
-        <div className="text-center mt-6 pt-6 border-t border-gray-200">
-          <p className="text-sm text-gray-500">
+        <div className="text-center mt-6 pt-6 border-t border-gruvbox-light-bg3 dark:border-gruvbox-dark-bg3">
+          <p className="text-sm text-gruvbox-gray">
             Need help?{" "}
             <a
               href="mailto:support@oldvibes.io.vn"
-              className="text-purple-600 hover:text-purple-700 font-medium"
+              className="text-gruvbox-orange hover:text-gruvbox-orange-dark font-medium"
             >
               Contact Support
             </a>
