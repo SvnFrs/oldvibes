@@ -13,7 +13,8 @@ services:
       - oldvibes-networks
       - oldvibes-traefik-internal
     depends_on:
-      - oldvibes-traefik # ✅ Add this to ensure Traefik starts first (Definitely working)
+      oldvibes-traefik:
+        condition: service_healthy
 
   # Traefik Reverse Proxy - Downgrade to v2.10 or fix v3 config
   oldvibes-traefik:
@@ -42,12 +43,15 @@ services:
     environment:
       - CF_DNS_API_TOKEN=${CF_API_TOKEN} # ✅ Add this like fcoder
     networks:
-      oldvibes_networks:
-        aliases:
-          - oldvibes-traefik
-      oldvibes-traefik-internal:
-        aliases:
-          - oldvibes-traefik
+      - oldvibes-networks
+      - oldvibes-traefik-internal
+    healthcheck:
+      test:
+        ["CMD", "wget", "--spider", "-q", "http://localhost:8080/dashboard/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   # Cloudflare Companion - Fix API URL
   oldvibes-cloudflare-companion:
