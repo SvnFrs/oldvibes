@@ -37,30 +37,6 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
-  openGraph: {
-    title: "Old Vibes - Discover Amazing Secondhand Treasures",
-    description:
-      "Connect with vintage enthusiasts and discover unique secondhand items through our mobile app.",
-    url: "https://oldvibes.io.vn",
-    siteName: "Old Vibes",
-    images: [
-      {
-        url: "/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Old Vibes - Secondhand Marketplace",
-      },
-    ],
-    locale: "en_US",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Old Vibes - Discover Amazing Secondhand Treasures",
-    description:
-      "Connect with vintage enthusiasts and discover unique secondhand items through our mobile app.",
-    images: ["/og-image.jpg"],
-  },
   robots: {
     index: true,
     follow: true,
@@ -83,8 +59,6 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="icon" href="/icon.svg" type="image/svg+xml" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/manifest.json" />
       </head>
       <body

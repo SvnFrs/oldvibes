@@ -115,7 +115,7 @@ export default function HomePage() {
           </div>
           <div className="flex-1 flex justify-center">
             <Image
-              src="/app-preview.png"
+              src="https://www.todayifoundout.com/wp-content/uploads/2017/11/rick-astley.png"
               alt="App preview"
               width={220}
               height={440}
@@ -154,7 +154,7 @@ export default function HomePage() {
           </div>
           <div className="flex justify-center">
             <Image
-              src="/explore-preview.png"
+              src="https://www.todayifoundout.com/wp-content/uploads/2017/11/rick-astley.png"
               alt="Explore preview"
               width={320}
               height={220}

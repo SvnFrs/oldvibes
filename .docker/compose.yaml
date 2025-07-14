@@ -25,7 +25,6 @@ services:
       - "--accesslog=true"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
-      - "--entrypoints.mongodb.address=:27017"
       - "--api.dashboard=true"
       - "--api.insecure=true"
       - "--providers.docker=true"
@@ -36,7 +35,6 @@ services:
       - "80:80"
       - "443:443"
       - "8080:8080" # ✅ Add dashboard port
-      - "27017:27017"
     profiles:
       - prod
     volumes:
@@ -109,15 +107,6 @@ services:
       - mongo-config:/data/configdb
     networks:
       - oldvibes-networks
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=oldvibes_networks"
-      # ✅ Fix TCP routing
-      - "traefik.tcp.routers.oldvibes-mongo.rule=HostSNI(`*`)" # Accept any SNI
-      - "traefik.tcp.routers.oldvibes-mongo.entrypoints=mongodb"
-      - "traefik.tcp.services.oldvibes-mongo.loadbalancer.server.port=27017"
-      # ✅ Add service designation
-      - "traefik.tcp.routers.oldvibes-mongo.service=oldvibes-mongo"
     healthcheck:
       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
       interval: 30s
