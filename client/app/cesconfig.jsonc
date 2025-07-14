@@ -1,5 +1,7 @@
+// This is an optional configuration file used primarily for debugging purposes when reporting issues.
+// It is safe to delete this file as it does not affect the functionality of your application.
 {
-  "cesVersion": "2.18.3",
+  "cesVersion": "2.18.6",
   "projectName": "app",
   "packages": [
     {
@@ -25,12 +27,12 @@
   },
   "packageManager": {
     "type": "bun",
-    "version": "1.2.16"
+    "version": "1.2.17"
   },
   "os": {
     "type": "Linux",
     "platform": "linux",
     "arch": "x64",
-    "kernelVersion": "6.15.2-zen1-1-zen"
+    "kernelVersion": "6.15.3-zen1-1-zen"
   }
 }
