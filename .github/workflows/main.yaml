@@ -209,9 +209,18 @@ jobs:
             sudo docker pull ${REGISTRY}/oldvibes-frontend:latest
             sudo docker pull ${REGISTRY}/oldvibes-backend:latest
 
-            # Run docker compose with the explicit env-file flag
+            # Get internal IP of traefik container
+            TRAEFIK_IP=$(sudo docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' oldvibes-traefik)
+            echo "Resolved oldvibes-traefik IP: $TRAEFIK_IP"
+
+            # Generate patched docker-compose with extra_hosts for cloudflare-tunnel
+            echo "Patching docker-compose to add extra_hosts for oldvibes-cloudflare-tunnel..."
+            sudo cp .docker/compose.yaml .docker/compose.patched.yaml
+            sudo sed -i "/oldvibes-cloudflare-tunnel:/a \ \ \ \ extra_hosts:\n \ \ \ \ \ \ - \"oldvibes-traefik:$TRAEFIK_IP\"" .docker/compose.patched.yaml
+
+            # Start services using patched file
             echo "=== Starting Services ==="
-            sudo docker compose -f .docker/compose.yaml --env-file .env --profile prod up -d
+            sudo docker compose -f .docker/compose.patched.yaml --env-file .env --profile prod up -d
 
             # Wait for services to start
             sleep 30
