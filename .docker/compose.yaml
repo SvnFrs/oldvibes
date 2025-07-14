@@ -42,8 +42,12 @@ services:
     environment:
       - CF_DNS_API_TOKEN=${CF_API_TOKEN} # ✅ Add this like fcoder
     networks:
-      - oldvibes-networks
-      - oldvibes-traefik-internal
+      oldvibes_networks:
+        aliases:
+          - oldvibes-traefik
+      oldvibes-traefik-internal:
+        aliases:
+          - oldvibes-traefik
 
   # Cloudflare Companion - Fix API URL
   oldvibes-cloudflare-companion:
