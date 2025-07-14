@@ -209,17 +209,28 @@ jobs:
             sudo docker pull ${REGISTRY}/oldvibes-frontend:latest
             sudo docker pull ${REGISTRY}/oldvibes-backend:latest
 
-            # Get internal IP of traefik container
-            TRAEFIK_IP=$(sudo docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' oldvibes-traefik)
-            echo "Resolved oldvibes-traefik IP: $TRAEFIK_IP"
+            # Start Traefik early so we can get its IP
+            echo "🚀 Starting Traefik to get IP..."
+            sudo docker compose -f .docker/compose.yaml --env-file .env --profile prod up -d oldvibes-traefik
+            sleep 10
 
-            # Generate patched docker-compose with extra_hosts for cloudflare-tunnel
-            echo "Patching docker-compose to add extra_hosts for oldvibes-cloudflare-tunnel..."
+            # Get internal IP of traefik container from correct network
+            TRAEFIK_IP=$(sudo docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{if eq $k "oldvibes_networks"}}{{$v.IPAddress}}{{end}}{{end}}' oldvibes-traefik)
+
+            if [ -z "$TRAEFIK_IP" ]; then
+              echo "❌ ERROR: Could not resolve IP of oldvibes-traefik. Is it running?"
+              sudo docker ps -a
+              exit 1
+            fi
+
+            echo "✅ Resolved oldvibes-traefik IP: $TRAEFIK_IP"
+
+            # Patch compose file with extra_hosts
             sudo cp .docker/compose.yaml .docker/compose.patched.yaml
-            sudo sed -i "/oldvibes-cloudflare-tunnel:/a \ \ \ \ extra_hosts:\n \ \ \ \ \ \ - \"oldvibes-traefik:$TRAEFIK_IP\"" .docker/compose.patched.yaml
+            sudo sed -i "/oldvibes-cloudflare-tunnel:/a \ \ \ \ extra_hosts:\n\ \ \ \ \ \ - \"oldvibes-traefik:$TRAEFIK_IP\"" .docker/compose.patched.yaml
 
-            # Start services using patched file
-            echo "=== Starting Services ==="
+            # Bring up full stack
+            echo "🚀 Starting All Services..."
             sudo docker compose -f .docker/compose.patched.yaml --env-file .env --profile prod up -d
 
             # Wait for services to start
