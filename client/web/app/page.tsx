@@ -1,363 +1,242 @@
-// import Link from "next/link";
+import {
+  IconPhoto,
+  IconClock,
+  IconUsers,
+  IconSearch,
+  IconMessageCircle,
+  IconCheck,
+} from "@tabler/icons-react";
+import Image from "next/image";
+import Wrapper from "./_sections/wrapper";
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-600 rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-lg">🌊</span>
-              </div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                Old Vibes
-              </h1>
-            </div>
-            <nav className="hidden md:flex space-x-8">
-              <a
-                href="#features"
-                className="text-gray-600 hover:text-purple-600 transition-colors"
-              >
-                Features
-              </a>
-              <a
-                href="#download"
-                className="text-gray-600 hover:text-purple-600 transition-colors"
-              >
-                Download
-              </a>
-              <a
-                href="#contact"
-                className="text-gray-600 hover:text-purple-600 transition-colors"
-              >
-                Contact
-              </a>
-            </nav>
-          </div>
-        </div>
-      </header>
-
+    <Wrapper>
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="text-center">
-            <div className="mb-8">
-              <span className="inline-block bg-purple-100 text-purple-800 px-4 py-2 rounded-full text-sm font-medium mb-4">
-                🎉 Coming Soon - Mobile App
-              </span>
-            </div>
-            <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6">
-              Discover Amazing
-              <span className="block bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                Secondhand Treasures
-              </span>
-            </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-              Connect with vintage enthusiasts and discover unique secondhand
-              items. Share your old vibes and find amazing treasures from the
-              past through our mobile app.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-4 rounded-xl font-semibold hover:shadow-lg transform hover:scale-105 transition-all">
-                📱 Get the App (Soon)
-              </button>
-              <button className="border-2 border-purple-600 text-purple-600 px-8 py-4 rounded-xl font-semibold hover:bg-purple-50 transition-colors">
-                🎬 Watch Demo
-              </button>
+      <section className="relative bg-gruvbox-light-bg0 dark:bg-gruvbox-dark-bg0 py-16 px-4 sm:px-8">
+        <div className="max-w-3xl mx-auto text-center">
+          <div className="flex justify-center mb-4">
+            <div className="bg-gruvbox-yellow-light dark:bg-gruvbox-yellow-dark w-16 h-16 rounded-xl flex items-center justify-center shadow-md">
+              <Image
+                src="/oldvibes-small.png"
+                alt="Old Vibes logo"
+                width={64}
+                height={64}
+                className="rounded-md object-contain"
+                priority
+              />
             </div>
           </div>
-
-          {/* Hero Image/Mockup */}
-          <div className="mt-16 relative">
-            <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-4xl mx-auto">
-              <div className="bg-gradient-to-br from-purple-100 to-blue-100 rounded-xl h-96 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-6xl mb-4">📱</div>
-                  <h3 className="text-2xl font-semibold text-gray-700 mb-2">
-                    Mobile App Preview
-                  </h3>
-                  <p className="text-gray-500">
-                    Beautiful interface coming soon
-                  </p>
-                </div>
-              </div>
-            </div>
+          <h1 className="text-4xl sm:text-5xl font-bold font-mono text-gruvbox-orange-light dark:text-gruvbox-orange-dark mb-3">
+            Share &amp; Sell Your Old Vibes
+          </h1>
+          <p className="text-lg text-gruvbox-gray mb-6">
+            Snap, share, and sell your preloved goods in a fun, story-like way.
+            Connect with friends and the community—discover unique finds, or
+            give your old treasures a new home.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-2">
+            <a
+              href="#download"
+              className="inline-block px-6 py-3 rounded-lg bg-gruvbox-orange text-gruvbox-bg font-bold shadow hover:bg-gruvbox-yellow transition text-lg"
+            >
+              Download the App
+            </a>
+            <a
+              href="#features"
+              className="inline-block px-6 py-3 rounded-lg border border-gruvbox-orange text-gruvbox-orange font-bold hover:bg-gruvbox-orange hover:text-gruvbox-dark-bg0 transition text-lg"
+            >
+              See How It Works
+            </a>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Why Choose Old Vibes?
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              We&apos;re building the perfect platform for secondhand item
-              enthusiasts
+      <section id="features" className="max-w-5xl mx-auto py-12 px-4 sm:px-8">
+        <h2 className="text-2xl sm:text-3xl font-bold font-mono text-gruvbox-orange-light dark:text-gruvbox-orange-dark text-center mb-8">
+          How Old Vibes Works
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="flex flex-col items-center text-center">
+            <div className="bg-gruvbox-blue-dark/10 dark:bg-gruvbox-blue-light/10 rounded-xl p-4 mb-3">
+              <IconPhoto size={36} className="text-gruvbox-blue" />
+            </div>
+            <h3 className="font-bold font-mono mb-2">Share Stories</h3>
+            <p className="text-gruvbox-gray text-sm">
+              Post photos or videos of your used goods as reels or stories. Add
+              descriptions, prices, and tags to help buyers discover your items.
             </p>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center p-6">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <span className="text-white text-2xl">🔍</span>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Discover Unique Items
-              </h3>
-              <p className="text-gray-600">
-                Find one-of-a-kind vintage and secondhand treasures from
-                passionate sellers
-              </p>
+          <div className="flex flex-col items-center text-center">
+            <div className="bg-gruvbox-yellow-dark/10 dark:bg-gruvbox-yellow-light/10 rounded-xl p-4 mb-3">
+              <IconClock size={36} className="text-gruvbox-yellow" />
             </div>
-
-            <div className="text-center p-6">
-              <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <span className="text-white text-2xl">💬</span>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Connect & Chat
-              </h3>
-              <p className="text-gray-600">
-                Real-time messaging to negotiate prices and learn about item
-                history
-              </p>
+            <h3 className="font-bold font-mono mb-2">24-Hour Vibes</h3>
+            <p className="text-gruvbox-gray text-sm">
+              Your posts are live for 24 hours, then archived. Keep the feed
+              fresh and discover new treasures every day!
+            </p>
+          </div>
+          <div className="flex flex-col items-center text-center">
+            <div className="bg-gruvbox-green-dark/10 dark:bg-gruvbox-green-light/10 rounded-xl p-4 mb-3">
+              <IconUsers size={36} className="text-gruvbox-green" />
             </div>
-
-            <div className="text-center p-6">
-              <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <span className="text-white text-2xl">⚡</span>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                24-Hour Vibes
-              </h3>
-              <p className="text-gray-600">
-                Quick 24-hour listings create urgency and excitement for buyers
-              </p>
-            </div>
-
-            <div className="text-center p-6">
-              <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <span className="text-white text-2xl">🛡️</span>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Safe & Secure
-              </h3>
-              <p className="text-gray-600">
-                Verified users and moderated content ensure a safe marketplace
-              </p>
-            </div>
-
-            <div className="text-center p-6">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <span className="text-white text-2xl">🌱</span>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Sustainable Living
-              </h3>
-              <p className="text-gray-600">
-                Promote circular economy by giving items a second life
-              </p>
-            </div>
-
-            <div className="text-center p-6">
-              <div className="w-16 h-16 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <span className="text-white text-2xl">🎯</span>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Smart Matching
-              </h3>
-              <p className="text-gray-600">
-                AI-powered recommendations based on your style and preferences
-              </p>
-            </div>
+            <h3 className="font-bold font-mono mb-2">Connect &amp; Trade</h3>
+            <p className="text-gruvbox-gray text-sm">
+              Chat, comment, and follow users. No checkout—just message sellers
+              directly to buy and arrange delivery.
+            </p>
           </div>
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-20 bg-gradient-to-r from-purple-600 to-blue-600">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4">
-              Join the Old Vibes Community
-            </h2>
-            <p className="text-xl text-purple-100">
-              Be part of the sustainable secondhand revolution
+      {/* Community & Trust Section */}
+      <section className="max-w-4xl mx-auto py-10 px-4 sm:px-8">
+        <div className="bg-gruvbox-light-bg1 dark:bg-gruvbox-dark-bg1 rounded-2xl p-8 flex flex-col md:flex-row items-center gap-8 shadow">
+          <div className="flex-1">
+            <h3 className="text-xl font-bold font-mono text-gruvbox-orange-light dark:text-gruvbox-orange-dark mb-2">
+              Safe, Simple, and Social
+            </h3>
+            <ul className="text-gruvbox-gray text-sm space-y-2">
+              <li className="flex items-center gap-2">
+                <IconCheck size={18} className="text-gruvbox-green" />
+                All posts are reviewed by staff for legitimacy.
+              </li>
+              <li className="flex items-center gap-2">
+                <IconCheck size={18} className="text-gruvbox-green" />
+                No fees, no checkout—just connect and trade.
+              </li>
+              <li className="flex items-center gap-2">
+                <IconCheck size={18} className="text-gruvbox-green" />
+                Like, comment, and share to build a trusted community.
+              </li>
+            </ul>
+          </div>
+          <div className="flex-1 flex justify-center">
+            <Image
+              src="/app-preview.png"
+              alt="App preview"
+              width={220}
+              height={440}
+              className="rounded-xl shadow-lg border border-gruvbox-gray"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Search & Explore Section */}
+      <section className="max-w-5xl mx-auto py-10 px-4 sm:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+          <div>
+            <h3 className="text-xl font-bold font-mono text-gruvbox-orange-light dark:text-gruvbox-orange-dark mb-2">
+              Find Your Next Treasure
+            </h3>
+            <p className="text-gruvbox-gray text-sm mb-4">
+              Search for specific items, browse by category, or explore trending
+              vibes and popular users. Follow your friends to see their latest
+              finds!
+            </p>
+            <ul className="text-gruvbox-gray text-sm space-y-2">
+              <li className="flex items-center gap-2">
+                <IconSearch size={18} className="text-gruvbox-blue" />
+                Powerful search &amp; filters
+              </li>
+              <li className="flex items-center gap-2">
+                <IconUsers size={18} className="text-gruvbox-green" />
+                Follow users &amp; build your feed
+              </li>
+              <li className="flex items-center gap-2">
+                <IconMessageCircle size={18} className="text-gruvbox-purple" />
+                DM sellers or comment on posts
+              </li>
+            </ul>
+          </div>
+          <div className="flex justify-center">
+            <Image
+              src="/explore-preview.png"
+              alt="Explore preview"
+              width={320}
+              height={220}
+              className="rounded-xl shadow border border-gruvbox-gray"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ / Info Section */}
+      <section className="max-w-3xl mx-auto py-10 px-4 sm:px-8">
+        <h3 className="text-xl font-bold font-mono text-gruvbox-orange-light dark:text-gruvbox-orange-dark mb-4 text-center">
+          Frequently Asked
+        </h3>
+        <div className="space-y-6 text-gruvbox-gray text-sm">
+          <div>
+            <span className="font-bold text-gruvbox-orange">
+              How do I sell something?
+            </span>
+            <p>
+              Download the app, snap photos or videos of your item, add details,
+              and post as a vibe. Our staff will review your post before it goes
+              live.
             </p>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div className="text-4xl font-bold text-white mb-2">10K+</div>
-              <div className="text-purple-100">Items Listed</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-white mb-2">5K+</div>
-              <div className="text-purple-100">Happy Users</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-white mb-2">95%</div>
-              <div className="text-purple-100">Satisfaction Rate</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-white mb-2">24h</div>
-              <div className="text-purple-100">Average Response</div>
-            </div>
+          <div>
+            <span className="font-bold text-gruvbox-orange">
+              How do I buy something?
+            </span>
+            <p>
+              Browse or search for items. If you find something you like,
+              message the seller directly to arrange payment and delivery.
+            </p>
+          </div>
+          <div>
+            <span className="font-bold text-gruvbox-orange">
+              Is there a fee?
+            </span>
+            <p>
+              No! Old Vibes is free to use. We just help you connect with buyers
+              and sellers.
+            </p>
+          </div>
+          <div>
+            <span className="font-bold text-gruvbox-orange">
+              What happens after 24 hours?
+            </span>
+            <p>
+              Your post is archived, but you can always repost or manage your
+              vibes in the app.
+            </p>
           </div>
         </div>
       </section>
 
       {/* Download Section */}
-      <section id="download" className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">
-            Get Ready for Launch
-          </h2>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Our mobile app is coming soon! Sign up to be notified when it&apos;s
-            available.
-          </p>
-
-          <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md mx-auto">
-            <div className="mb-6">
-              <div className="text-4xl mb-4">📧</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Stay Updated
-              </h3>
-              <p className="text-gray-600">
-                Be the first to know when we launch
-              </p>
-            </div>
-
-            <form className="space-y-4">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              />
-              <button
-                type="submit"
-                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all"
-              >
-                Notify Me
-              </button>
-            </form>
-          </div>
-
-          <div className="mt-12 flex justify-center space-x-4">
-            <div className="bg-black text-white px-6 py-3 rounded-lg opacity-50">
-              <div className="flex items-center space-x-2">
-                <span>📱</span>
-                <div>
-                  <div className="text-xs">Coming Soon</div>
-                  <div className="font-semibold">App Store</div>
-                </div>
-              </div>
-            </div>
-            <div className="bg-black text-white px-6 py-3 rounded-lg opacity-50">
-              <div className="flex items-center space-x-2">
-                <span>🤖</span>
-                <div>
-                  <div className="text-xs">Coming Soon</div>
-                  <div className="font-semibold">Google Play</div>
-                </div>
-              </div>
-            </div>
-          </div>
+      <section
+        id="download"
+        className="max-w-3xl mx-auto py-12 px-4 sm:px-8 text-center"
+      >
+        <h2 className="text-2xl font-bold font-mono text-gruvbox-orange-light dark:text-gruvbox-orange-dark mb-4">
+          Ready to Share Your Old Vibes?
+        </h2>
+        <p className="text-gruvbox-gray mb-6">
+          Download the Old Vibes app and start sharing, selling, and discovering
+          unique finds today!
+        </p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <a
+            href="#"
+            className="inline-block px-6 py-3 rounded-lg bg-gruvbox-orange text-gruvbox-bg font-bold shadow hover:bg-gruvbox-yellow transition text-lg"
+          >
+            Download for iOS
+          </a>
+          <a
+            href="#"
+            className="inline-block px-6 py-3 rounded-lg border border-gruvbox-orange text-gruvbox-orange font-bold hover:bg-gruvbox-orange hover:text-gruvbox-dark-bg0 transition text-lg"
+          >
+            Download for Android
+          </a>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold">🌊</span>
-                </div>
-                <span className="text-xl font-bold">Old Vibes</span>
-              </div>
-              <p className="text-gray-400">
-                Connecting vintage enthusiasts worldwide through secondhand
-                treasures.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="font-semibold mb-4">Product</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    Features
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    Mobile App
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    Web Platform
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-semibold mb-4">Company</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    About Us
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    Blog
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    Careers
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-semibold mb-4">Support</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    Help Center
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    Contact Us
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    Privacy Policy
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 Old Vibes. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
-    </div>
+    </Wrapper>
   );
 }
