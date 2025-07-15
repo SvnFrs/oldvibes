@@ -50,17 +50,18 @@ app.use(
 );
 
 // CORS - Allow Socket.io
-app.use(
-  cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? ["your-production-domain.com"]
-        : ["http://localhost:3000", "http://localhost:5173"],
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
-  }),
-);
+if (process.env.NODE_ENV === "development") {
+  app.use(cors());
+} else {
+  app.use(
+    cors({
+      origin: ["your-production-domain.com"],
+      credentials: true,
+      methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+    }),
+  );
+}
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
