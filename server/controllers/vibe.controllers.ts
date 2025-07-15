@@ -34,6 +34,19 @@ export const createVibe = async (
   }
 };
 
+export const getAllVibes = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const vibes = await vibeModel.getAllVibes();
+    res.json({ vibes, count: vibes.length });
+  } catch (error) {
+    console.error("Get all vibes (admin) error:", error);
+    res.status(500).json({ message: "Error fetching all vibes", error });
+  }
+};
+
 export const getVibe = async (
   req: AuthenticatedRequest,
   res: Response,

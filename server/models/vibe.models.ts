@@ -61,6 +61,15 @@ export class VibeModel {
     return !!result;
   }
 
+  async getAllVibes(): Promise<VibeResponse[]> {
+    const vibes = await Vibe.find({})
+      .populate("userId", "username name profilePicture isVerified")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return vibes.map((vibe) => this.formatVibeResponse(vibe));
+  }
+
   async getVibes(filters: VibeFilters = {}): Promise<VibeResponse[]> {
     const query: any = {};
 
@@ -130,10 +139,13 @@ export class VibeModel {
 
   async markAsSold(vibeId: string, userId: string): Promise<boolean> {
     const result = await Vibe.findOneAndUpdate(
-      { _id: vibeId, userId, status: "approved" },
+      {
+        _id: new mongoose.Types.ObjectId(vibeId),
+        userId: new mongoose.Types.ObjectId(userId),
+        status: "approved",
+      },
       { status: "sold", updatedAt: new Date() },
     );
-
     return !!result;
   }
 
@@ -249,16 +261,37 @@ export class VibeModel {
   ): Promise<VibeResponse[]> {
     const query: any = { userId };
 
-    // If requesting user is different from profile user, only show approved vibes
+    console.log(userId);
+    console.log(requestingUserId);
+
     if (!requestingUserId || requestingUserId !== userId) {
+      // Not the owner: only show approved and not expired
       query.status = "approved";
       query.expiresAt = { $gt: new Date() };
     }
 
     const vibes = await Vibe.find(query)
       .populate("userId", "username name profilePicture isVerified")
-      .sort({ createdAt: -1 })
       .lean();
+
+    // Optional: sort for owner
+    if (requestingUserId === userId) {
+      const statusOrder = [
+        "pending",
+        "approved",
+        "sold",
+        "archived",
+        "rejected",
+      ];
+      vibes.sort((a, b) => {
+        const statusDiff =
+          statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status);
+        if (statusDiff !== 0) return statusDiff;
+        return b.createdAt.getTime() - a.createdAt.getTime();
+      });
+    } else {
+      vibes.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    }
 
     return vibes.map((vibe) => this.formatVibeResponse(vibe, requestingUserId));
   }

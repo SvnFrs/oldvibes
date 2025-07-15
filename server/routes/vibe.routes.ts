@@ -14,9 +14,14 @@ import {
   getPendingVibes,
   moderateVibe,
   uploadVibeMedia,
+  getAllVibes,
 } from "../controllers/vibe.controllers";
 import { authenticateToken } from "../middleware/auth.middleware";
-import { requireStaff, requireUser } from "../middleware/role.middleware";
+import {
+  requireAdmin,
+  requireStaff,
+  requireUser,
+} from "../middleware/role.middleware";
 import { validateVibeCreation } from "../middleware/validation.middleware";
 import { uploadToS3 } from "../middleware/upload.middleware";
 import { requireEmailVerification } from "../middleware/emailVerification.middleware";
@@ -66,6 +71,24 @@ const router = Router();
  *       schema: { type: string }
  *       description: Vibe ID
  */
+
+/**
+ * @swagger
+ * /vibes/all:
+ *   get:
+ *     summary: Get all vibes (admin only)
+ *     tags: [Admin]
+ *     security: [{ cookieAuth: [] }]
+ *     responses:
+ *       200: { description: All vibes retrieved }
+ *       403: { description: Admin access required }
+ */
+router.get(
+  "/all",
+  authenticateToken,
+  requireAdmin as RequestHandler,
+  getAllVibes,
+);
 
 /**
  * @swagger
@@ -162,7 +185,7 @@ router.get(
  *     responses:
  *       200: { description: User vibes (approved only for others) }
  */
-router.get("/user/:userId", getUserVibes);
+router.get("/user/:userId", authenticateToken, getUserVibes);
 
 /**
  * @swagger
