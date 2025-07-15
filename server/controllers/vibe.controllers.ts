@@ -120,13 +120,16 @@ export const deleteVibe = async (
   try {
     const { vibeId } = req.params;
     const userId = req.user!.userId;
+    const role = req.user!.role;
 
     if (!vibeId) {
       res.status(400).json({ message: "Vibe ID is required" });
       return;
     }
 
-    const deleted = await vibeModel.deleteVibe(vibeId, userId);
+    // Allow admin/staff to delete any vibe
+    const isAdminOrStaff = role === "admin" || role === "staff";
+    const deleted = await vibeModel.deleteVibe(vibeId, userId, isAdminOrStaff);
 
     if (!deleted) {
       res.status(404).json({ message: "Vibe not found" });
@@ -139,7 +142,6 @@ export const deleteVibe = async (
     res.status(500).json({ message: "Error deleting vibe", error });
   }
 };
-
 export const getVibes = async (
   req: AuthenticatedRequest,
   res: Response,

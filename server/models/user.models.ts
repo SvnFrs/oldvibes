@@ -246,4 +246,36 @@ export class UserModel {
       "-password",
     );
   }
+
+  // Ban user (soft delete)
+  async banUser(targetUserId: string): Promise<boolean> {
+    const result = await User.findByIdAndUpdate(targetUserId, {
+      isActive: false,
+      updatedAt: new Date(),
+    });
+    return !!result;
+  }
+
+  // Unban user
+  async unbanUser(targetUserId: string): Promise<boolean> {
+    const result = await User.findByIdAndUpdate(targetUserId, {
+      isActive: true,
+      updatedAt: new Date(),
+    });
+    return !!result;
+  }
+
+  // Get user role (for permission checks)
+  async getRole(userId: string): Promise<string | null> {
+    const user = await User.findById(userId).select("role");
+    return user ? user.role : null;
+  }
+
+  async listAllUsers(limit = 50, offset = 0): Promise<IUser[]> {
+    return await User.find({})
+      .select("-password")
+      .sort({ createdAt: -1 })
+      .skip(offset)
+      .limit(limit);
+  }
 }

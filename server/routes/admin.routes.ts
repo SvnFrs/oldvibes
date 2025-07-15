@@ -4,9 +4,13 @@ import {
   editStaff,
   deleteStaff,
   listStaff,
+  banUser,
+  unbanUser,
+  listAllUsers,
 } from "../controllers/admin.controllers";
 import { authenticateToken } from "../middleware/auth.middleware";
-import { requireAdmin } from "../middleware/role.middleware";
+import { requireAdmin, requireStaff } from "../middleware/role.middleware";
+import type { RequestHandler } from "../types/handler.types";
 
 const router = Router();
 
@@ -93,5 +97,82 @@ router.delete("/staff/:staffId", authenticateToken, requireAdmin, deleteStaff);
  *       200: { description: List of staff }
  */
 router.get("/staff", authenticateToken, requireAdmin, listStaff);
+
+/**
+ * @swagger
+ * /admin/users/{targetUserId}/ban:
+ *   patch:
+ *     summary: Ban a user
+ *     tags: [Admin]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: targetUserId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User banned
+ *       403:
+ *         description: Insufficient permissions
+ *       404:
+ *         description: User not found
+ */
+router.patch(
+  "/users/:targetUserId/ban",
+  authenticateToken,
+  requireStaff as RequestHandler,
+  banUser as RequestHandler,
+);
+
+/**
+ * @swagger
+ * /admin/users/{targetUserId}/unban:
+ *   patch:
+ *     summary: Unban a user
+ *     tags: [Admin]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: targetUserId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User unbanned
+ *       403:
+ *         description: Insufficient permissions
+ *       404:
+ *         description: User not found
+ */
+router.patch(
+  "/users/:targetUserId/unban",
+  authenticateToken,
+  requireStaff as RequestHandler,
+  unbanUser as RequestHandler,
+);
+
+/**
+ * @swagger
+ * /admin/users:
+ *   get:
+ *     summary: List all users (admin only)
+ *     tags: [Admin]
+ *     security: [{ cookieAuth: [] }]
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 50 }
+ *       - in: query
+ *         name: offset
+ *         schema: { type: integer, default: 0 }
+ *     responses:
+ *       200: { description: List of users }
+ */
+router.get("/users", authenticateToken, requireStaff, listAllUsers);
 
 export default router;

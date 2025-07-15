@@ -52,12 +52,16 @@ export class VibeModel {
     return vibe;
   }
 
-  async deleteVibe(vibeId: string, userId: string): Promise<boolean> {
-    const result = await Vibe.findOneAndDelete({
-      _id: vibeId,
-      userId,
-    });
-
+  async deleteVibe(
+    vibeId: string,
+    userId: string,
+    isAdminOrStaff = false,
+  ): Promise<boolean> {
+    const query: any = { _id: vibeId };
+    if (!isAdminOrStaff) {
+      query.userId = userId;
+    }
+    const result = await Vibe.findOneAndDelete(query);
     return !!result;
   }
 
