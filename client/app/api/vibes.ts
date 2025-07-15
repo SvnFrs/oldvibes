@@ -1,6 +1,7 @@
 import { apiUrl } from '~/utils/common';
 import { Vibes, VibesResponse } from '~/utils/type';
 import { withAuthHeaders } from './api';
+import { StorageService } from '~/utils/storage';
 
 export async function getVibes(): Promise<VibesResponse> {
   try {
@@ -58,5 +59,54 @@ export async function searchVibes({
   const url = `${apiUrl}/vibes/search?${params.toString()}`;
   const res = await fetch(url, await withAuthHeaders({ method: 'GET' }));
   if (!res.ok) throw new Error('Failed to search vibes');
+  return await res.json();
+}
+
+export async function createVibe(vibeData) {
+  const token = await StorageService.getAccessToken();
+  const res = await fetch(`${apiUrl}/vibes`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(vibeData),
+  });
+  if (!res.ok) throw new Error('Failed to create vibe');
+  return await res.json();
+}
+
+export async function uploadVibeMedia(vibeId, files) {
+  const token = await StorageService.getAccessToken();
+  const formData = new FormData();
+  files.forEach((file, idx) => {
+    formData.append('media', {
+      uri: file.uri,
+      name: file.name || `media_${idx}.jpg`,
+      type: file.type || 'image/jpeg',
+    });
+  });
+  const res = await fetch(`${apiUrl}/vibes/${vibeId}/media`, {
+    method: 'POST',
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      // 'Content-Type': 'multipart/form-data', // Let RN set this
+    },
+    body: formData,
+  });
+  if (!res.ok) throw new Error('Failed to upload media');
+  return await res.json();
+}
+
+// Mark as sold (PATCH /vibes/:id/sold)
+export async function markVibeAsSold(vibeId) {
+  const token = await StorageService.getAccessToken();
+  const res = await fetch(`${apiUrl}/vibes/${vibeId}/sold`, {
+    method: 'PATCH',
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+  if (!res.ok) throw new Error('Failed to mark as sold');
   return await res.json();
 }

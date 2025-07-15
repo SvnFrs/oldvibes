@@ -8,8 +8,15 @@ import {
   Image,
   TouchableOpacity,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
-import { getVibeDetailAndIncreaseView, getVibes, likeVibe, unlikeVibe } from '~/api/vibes';
+import {
+  getVibeDetailAndIncreaseView,
+  getVibes,
+  likeVibe,
+  markVibeAsSold,
+  unlikeVibe,
+} from '~/api/vibes';
 import { Vibes, MediaFile } from '~/utils/type';
 import TablerIconComponent from '~/components/icon';
 import CommentModal from '~/components/comments/CommentModal';
@@ -67,12 +74,16 @@ function VibeCard({
   onUnlike,
   isLiked,
   onOpenComments,
+  onMarkAsSold,
+  isMine,
 }: {
   vibe: Vibes;
   onLike: () => void;
   onUnlike: () => void;
   isLiked: boolean;
   onOpenComments: () => void;
+  onMarkAsSold: () => void;
+  isMine: boolean;
 }) {
   const media = vibe.mediaFiles?.[0];
 
@@ -81,7 +92,7 @@ function VibeCard({
       className="w-full items-center justify-center"
       style={{ height: SCREEN_HEIGHT, width: SCREEN_WIDTH }}>
       <View
-        className="bg-gruvbox-dark-bg1/90 mb-16 overflow-hidden rounded-3xl shadow-xl"
+        className="mb-16 overflow-hidden rounded-3xl bg-gruvbox-dark-bg1/90 shadow-xl"
         style={{
           height: CARD_HEIGHT,
           width: CARD_WIDTH,
@@ -96,11 +107,11 @@ function VibeCard({
                 ? { uri: vibe.user.profilePicture }
                 : require('~/assets/oldvibes-small.png')
             }
-            className="border-gruvbox-yellow-dark h-10 w-10 rounded-full border-2"
+            className="h-10 w-10 rounded-full border-2 border-gruvbox-yellow-dark"
           />
           <View className="ml-3">
             <View className="flex-row items-center">
-              <Text className="text-gruvbox-light-bg0 text-lg font-bold">{vibe.user.username}</Text>
+              <Text className="text-lg font-bold text-gruvbox-light-bg0">{vibe.user.username}</Text>
               {vibe.user.isVerified && (
                 <TablerIconComponent
                   name="check"
@@ -110,26 +121,26 @@ function VibeCard({
                 />
               )}
             </View>
-            <Text className="text-gruvbox-dark-fg3 text-xs">{vibe.location}</Text>
+            <Text className="text-xs text-gruvbox-dark-fg3">{vibe.location}</Text>
           </View>
         </View>
 
         {/* Overlay: Bottom */}
         <View className="absolute bottom-0 left-0 right-0 z-10 px-4 pb-4">
           <View className="mb-1">
-            <Text className="text-gruvbox-yellow-dark text-xl font-bold">{vibe.itemName}</Text>
+            <Text className="text-xl font-bold text-gruvbox-yellow-dark">{vibe.itemName}</Text>
             <Text className="text-gruvbox-dark-fg1">{vibe.description}</Text>
           </View>
           <View className="mb-2 flex-row items-center">
-            <Text className="text-gruvbox-green-dark text-lg font-bold">${vibe.price}</Text>
-            <Text className="text-gruvbox-dark-fg4 ml-3 text-xs">{vibe.condition}</Text>
-            <Text className="text-gruvbox-dark-fg4 ml-3 text-xs">{vibe.category}</Text>
+            <Text className="text-lg font-bold text-gruvbox-green-dark">${vibe.price}</Text>
+            <Text className="ml-3 text-xs text-gruvbox-dark-fg4">{vibe.condition}</Text>
+            <Text className="ml-3 text-xs text-gruvbox-dark-fg4">{vibe.category}</Text>
           </View>
           <View className="mb-2 flex-row flex-wrap">
             {vibe.tags.map((tag) => (
               <Text
                 key={tag}
-                className="bg-gruvbox-dark-bg3 text-gruvbox-yellow-dark mb-1 mr-2 rounded-full px-2 py-1 text-xs">
+                className="mb-1 mr-2 rounded-full bg-gruvbox-dark-bg3 px-2 py-1 text-xs text-gruvbox-yellow-dark">
                 #{tag}
               </Text>
             ))}
@@ -138,15 +149,15 @@ function VibeCard({
           <View className="mt-2 flex-row items-center">
             <TouchableOpacity className="mr-6 items-center" onPress={isLiked ? onUnlike : onLike}>
               <TablerIconComponent name="heart" size={28} color={isLiked ? '#fb4934' : '#a89984'} />
-              <Text className="text-gruvbox-light-bg0 text-xs">{vibe.likesCount}</Text>
+              <Text className="text-xs text-gruvbox-light-bg0">{vibe.likesCount}</Text>
             </TouchableOpacity>
             <TouchableOpacity className="mr-6 items-center" onPress={onOpenComments}>
               <TablerIconComponent name="message-circle" size={28} color="#fabd2f" />
-              <Text className="text-gruvbox-light-bg0 text-xs">{vibe.commentsCount}</Text>
+              <Text className="text-xs text-gruvbox-light-bg0">{vibe.commentsCount}</Text>
             </TouchableOpacity>
             <TouchableOpacity className="mr-6 items-center">
               <TablerIconComponent name="share" size={28} color="#83a598" />
-              <Text className="text-gruvbox-light-bg0 text-xs">Share</Text>
+              <Text className="text-xs text-gruvbox-light-bg0">Share</Text>
             </TouchableOpacity>
             <TouchableOpacity
               className="items-center"
@@ -159,8 +170,21 @@ function VibeCard({
                 }
               }}>
               <TablerIconComponent name="send" size={28} color="#b8bb26" />
-              <Text className="text-gruvbox-light-bg0 text-xs">Contact</Text>
+              <Text className="text-xs text-gruvbox-light-bg0">Contact</Text>
             </TouchableOpacity>
+
+            {isMine && vibe.status !== 'sold' && (
+              <TouchableOpacity
+                className="ml-4 rounded-xl bg-gruvbox-green-dark px-4 py-2"
+                onPress={onMarkAsSold}>
+                <Text className="font-bold text-gruvbox-dark-bg0">Mark as Sold</Text>
+              </TouchableOpacity>
+            )}
+            {isMine && vibe.status === 'sold' && (
+              <View className="ml-4 rounded-xl bg-gruvbox-dark-bg3 px-4 py-2">
+                <Text className="font-bold text-gruvbox-yellow-dark">SOLD</Text>
+              </View>
+            )}
           </View>
         </View>
         {/* Optional: dark overlay for readability */}
@@ -251,7 +275,7 @@ export default function HomeScreen() {
 
   if (isLoading) {
     return (
-      <View className="bg-gruvbox-dark-bg0 flex-1 items-center justify-center">
+      <View className="flex-1 items-center justify-center bg-gruvbox-dark-bg0">
         <ActivityIndicator size="large" color="#fabd2f" />
       </View>
     );
@@ -259,8 +283,8 @@ export default function HomeScreen() {
 
   if (!vibes.length) {
     return (
-      <View className="bg-gruvbox-dark-bg0 flex-1 items-center justify-center">
-        <Text className="text-gruvbox-yellow-dark text-lg">
+      <View className="flex-1 items-center justify-center bg-gruvbox-dark-bg0">
+        <Text className="text-lg text-gruvbox-yellow-dark">
           No vibes yet. Be the first to post!
         </Text>
       </View>
@@ -268,16 +292,16 @@ export default function HomeScreen() {
   }
 
   return (
-    <View className="bg-gruvbox-dark-bg0 flex-1">
+    <View className="flex-1 bg-gruvbox-dark-bg0">
       <View className="absolute bottom-24 right-6 z-50">
         <TouchableOpacity
-          className="bg-gruvbox-red flex-row items-center rounded-xl px-4 py-2 shadow-lg"
+          className="flex-row items-center rounded-xl bg-gruvbox-red px-4 py-2 shadow-lg"
           onPress={async () => {
             await logout();
             router.replace('/(auth)/login');
           }}>
           <TablerIconComponent name="logout" size={18} color="#fbf1c7" />
-          <Text className="text-gruvbox-light-bg0 ml-2 font-bold">Logout</Text>
+          <Text className="ml-2 font-bold text-gruvbox-light-bg0">Logout</Text>
         </TouchableOpacity>
       </View>
 
@@ -293,6 +317,18 @@ export default function HomeScreen() {
             onOpenComments={() => {
               setSelectedVibeId(item.id);
               setCommentModalVisible(true);
+            }}
+            isMine={item.userId === currentUserId}
+            onMarkAsSold={async () => {
+              try {
+                await markVibeAsSold(item.id);
+                setVibes((prev) =>
+                  prev.map((v) => (v.id === item.id ? { ...v, status: 'sold' } : v))
+                );
+                Alert.alert('Marked as Sold', 'Your vibe is now marked as sold.');
+              } catch (e) {
+                Alert.alert('Error', e.message || 'Failed to mark as sold');
+              }
             }}
           />
         )}
