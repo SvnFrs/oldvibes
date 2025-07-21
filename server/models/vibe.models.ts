@@ -74,7 +74,10 @@ export class VibeModel {
     return vibes.map((vibe) => this.formatVibeResponse(vibe));
   }
 
-  async getVibes(filters: VibeFilters = {}): Promise<VibeResponse[]> {
+  async getVibes(
+    filters: VibeFilters = {},
+    userId?: string,
+  ): Promise<VibeResponse[]> {
     const query: any = {};
 
     // Build query based on filters
@@ -106,7 +109,8 @@ export class VibeModel {
       .limit(50)
       .lean();
 
-    return vibes.map((vibe) => this.formatVibeResponse(vibe));
+    // Pass userId to formatter so it can set isLiked
+    return vibes.map((vibe) => this.formatVibeResponse(vibe, userId));
   }
 
   async getPendingVibes(): Promise<VibeResponse[]> {

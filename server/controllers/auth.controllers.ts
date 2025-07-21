@@ -121,6 +121,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         username: user.username,
         role: user.role,
         isEmailVerified: user.isEmailVerified,
+        isVerified: user.isVerified,
       },
     });
   } catch (error) {
@@ -148,8 +149,11 @@ export const verifyEmail = async (
       return;
     }
 
-    // Update user's email verification status
-    await userModel.updateUser(result.userId!, { isEmailVerified: true });
+    // Update user's email verification status AND isVerified
+    await userModel.updateUser(result.userId!, {
+      isEmailVerified: true,
+      isVerified: true,
+    });
 
     // Send welcome email
     const user = await userModel.getById(result.userId!);

@@ -142,6 +142,7 @@ export const deleteVibe = async (
     res.status(500).json({ message: "Error deleting vibe", error });
   }
 };
+
 export const getVibes = async (
   req: AuthenticatedRequest,
   res: Response,
@@ -156,7 +157,10 @@ export const getVibes = async (
       tags: req.query.tags ? (req.query.tags as string).split(",") : undefined,
     };
 
-    const vibes = await vibeModel.getVibes(filters);
+    // 👇 Pass userId if present (from JWT)
+    const userId = req.user?.userId;
+
+    const vibes = await vibeModel.getVibes(filters, userId);
 
     res.json({ vibes, count: vibes.length });
   } catch (error) {

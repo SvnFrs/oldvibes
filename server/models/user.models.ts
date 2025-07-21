@@ -45,7 +45,10 @@ export class UserModel {
 
   async updateUser(
     id: string,
-    updateData: UpdateUserInput & { isEmailVerified?: boolean },
+    updateData: UpdateUserInput & {
+      isEmailVerified?: boolean;
+      isVerified?: boolean;
+    },
   ): Promise<IUser | null> {
     return await User.findByIdAndUpdate(
       id,

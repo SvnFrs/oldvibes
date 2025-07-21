@@ -26,6 +26,8 @@ import "./schema/conversation.schema";
 // Load environment variables
 dotenv.config();
 
+console.log("NODE_ENV:", process.env.NODE_ENV);
+
 setupCronJobs();
 
 const app = express();
