@@ -12,31 +12,38 @@ import {
   RefreshControl,
   Dimensions,
 } from 'react-native';
-import {
-  getMyProfile,
-  updateMyProfile,
-  updateMyAvatar,
-  getUserVibes,
-  uploadAvatar,
-} from '~/api/profile';
+import { getMyProfile, updateMyProfile, getUserVibes, uploadAvatar } from '~/api/profile';
 import { logout } from '~/api/auth';
-import { StorageService } from '~/utils/storage';
 import ProfileCard from '~/components/profile/ProfileCard';
-import TablerIconComponent from '~/components/icon';
+import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
+import TablerIconComponent from '~/components/icon';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const VIBE_SIZE = (SCREEN_WIDTH - 32 - 12) / 2; // 2 columns, 16px padding, 12px gap
 
 export default function ProfileScreen() {
-  const [profile, setProfile] = useState(null);
+  type Vibe = {
+    id: string;
+    mediaFiles?: { url: string }[];
+    itemName: string;
+    price: number | string;
+  };
+
+  type Profile = {
+    id: string;
+    name: string;
+    bio?: string;
+    // Add other fields as needed
+  };
+
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState('');
   const [editBio, setEditBio] = useState('');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [vibes, setVibes] = useState([]);
-  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [vibes, setVibes] = useState<Vibe[]>([]);
 
   useEffect(() => {
     fetchProfile();
@@ -53,7 +60,11 @@ export default function ProfileScreen() {
       const vibesRes = await getUserVibes(data.id);
       setVibes(vibesRes.vibes || []);
     } catch (e) {
-      Alert.alert('Error', e.message || 'Failed to load profile');
+      let message = 'Failed to load profile';
+      if (e instanceof Error) {
+        message = e.message;
+      }
+      Alert.alert('Error', message);
     }
     setLoading(false);
     setRefreshing(false);
@@ -65,38 +76,55 @@ export default function ProfileScreen() {
       setEditing(false);
       fetchProfile();
     } catch (e) {
-      Alert.alert('Error', e.message || 'Failed to update profile');
+      let message = 'Failed to update profile';
+      if (e instanceof Error) {
+        message = e.message;
+      }
+      Alert.alert('Error', message);
     }
   }
 
   async function handleAvatarPick() {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ImagePicker.MediaTypeOptions.All, // MediaTypeOptions is deprecated, but All is still supported for now
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
       });
       if (!result.canceled && result.assets && result.assets[0]?.uri) {
-        setAvatarUploading(true);
         await uploadAvatar(result.assets[0].uri);
         fetchProfile();
       }
     } catch (e) {
-      Alert.alert('Error', e.message || 'Failed to upload avatar');
-    } finally {
-      setAvatarUploading(false);
+      let message = 'Failed to upload avatar';
+      if (e instanceof Error) {
+        message = e.message;
+      }
+      Alert.alert('Error', message);
     }
   }
 
   async function handleLogout() {
-    await logout();
-    // Optionally, navigate to login
+    // Clear local storage and call logout API, but don't wait for it to finish before navigating
+    logout().catch(() => {}); // fire and forget
+
+    await new Promise((resolve) => setTimeout(resolve, 100)); // Small delay to ensure logout is processed
+
+    // Show alert immediately
+    Alert.alert('Logged out', 'You have been logged out.');
+
+    // Wait a moment to ensure logout is processed
+    // This is a simple delay, you can adjust as needed
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // Navigate to login screen immediately
+    router.replace('/(auth)/login');
   }
 
   if (loading) {
     return (
-      <View className="bg-gruvbox-dark-bg0 flex-1 items-center justify-center">
+      <View className="flex-1 items-center justify-center bg-gruvbox-dark-bg0">
         <ActivityIndicator size="large" color="#fabd2f" />
       </View>
     );
@@ -104,7 +132,7 @@ export default function ProfileScreen() {
 
   if (!profile) {
     return (
-      <View className="bg-gruvbox-dark-bg0 flex-1 items-center justify-center">
+      <View className="flex-1 items-center justify-center bg-gruvbox-dark-bg0">
         <Text className="text-gruvbox-yellow-dark">Failed to load profile.</Text>
       </View>
     );
@@ -112,7 +140,7 @@ export default function ProfileScreen() {
 
   return (
     <ScrollView
-      className="bg-gruvbox-dark-bg0 flex-1"
+      className="flex-1 bg-gruvbox-dark-bg0"
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
@@ -126,26 +154,30 @@ export default function ProfileScreen() {
       }>
       <ProfileCard
         profile={{ ...profile, vibesCount: vibes.length }}
-        isMe
+        isMe={true}
         onEdit={() => setEditing(true)}
         onAvatarPress={handleAvatarPick}
         onLogout={handleLogout}
+        onFollow={undefined}
+        isFollowing={undefined}
+        onFollowersPress={undefined}
+        onFollowingPress={undefined}
       />
 
       {/* Edit Modal */}
       {editing && (
-        <View className="absolute bottom-0 left-0 right-0 top-0 z-50 items-center justify-center bg-black/60">
-          <View className="bg-gruvbox-dark-bg1 w-11/12 rounded-2xl p-6">
-            <Text className="text-gruvbox-yellow-dark mb-4 text-xl font-bold">Edit Profile</Text>
+        <View className="absolute bottom-0 left-0 right-0 top-40 z-50 flex-1 items-center justify-center">
+          <View className="w-11/12 rounded-2xl bg-gruvbox-dark-bg1 p-6">
+            <Text className="mb-4 text-xl font-bold text-gruvbox-yellow-dark">Edit Profile</Text>
             <TextInput
-              className="bg-gruvbox-dark-bg2 text-gruvbox-light-bg0 mb-3 rounded-lg px-4 py-2"
+              className="mb-3 rounded-lg bg-gruvbox-dark-bg2 px-4 py-2 text-gruvbox-light-bg0"
               value={editName}
               onChangeText={setEditName}
               placeholder="Name"
               placeholderTextColor="#a89984"
             />
             <TextInput
-              className="bg-gruvbox-dark-bg2 text-gruvbox-light-bg0 mb-3 rounded-lg px-4 py-2"
+              className="mb-3 rounded-lg bg-gruvbox-dark-bg2 px-4 py-2 text-gruvbox-light-bg0"
               value={editBio}
               onChangeText={setEditBio}
               placeholder="Bio"
@@ -154,10 +186,10 @@ export default function ProfileScreen() {
             />
             <View className="flex-row justify-end gap-3">
               <TouchableOpacity onPress={() => setEditing(false)}>
-                <Text className="text-gruvbox-dark-fg3 font-bold">Cancel</Text>
+                <Text className="font-bold text-gruvbox-dark-fg3">Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={handleSave}>
-                <Text className="text-gruvbox-yellow-dark font-bold">Save</Text>
+                <Text className="font-bold text-gruvbox-yellow-dark">Save</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -165,11 +197,11 @@ export default function ProfileScreen() {
       )}
 
       {/* Divider */}
-      <View className="bg-gruvbox-dark-bg3 my-6 h-px w-full opacity-60" />
+      <View className="my-6 h-px w-full bg-gruvbox-dark-bg3 opacity-60" />
 
       {/* My Vibes */}
       <View className="px-4">
-        <Text className="text-gruvbox-yellow-dark mb-3 text-lg font-bold">My Vibes</Text>
+        <Text className="mb-3 text-lg font-bold text-gruvbox-yellow-dark">My Vibes</Text>
         {vibes.length === 0 ? (
           <Text className="text-gruvbox-dark-fg3">No vibes yet.</Text>
         ) : (
@@ -182,7 +214,7 @@ export default function ProfileScreen() {
             contentContainerStyle={{ gap: 12 }}
             renderItem={({ item }) => (
               <View
-                className="bg-gruvbox-dark-bg2 overflow-hidden rounded-2xl"
+                className="overflow-hidden rounded-2xl bg-gruvbox-dark-bg2"
                 style={{ width: VIBE_SIZE }}>
                 <Image
                   source={
@@ -194,10 +226,24 @@ export default function ProfileScreen() {
                   resizeMode="cover"
                 />
                 <View className="p-2">
-                  <Text className="text-gruvbox-yellow-dark font-bold" numberOfLines={1}>
-                    {item.itemName}
-                  </Text>
-                  <Text className="text-gruvbox-dark-fg3 text-xs" numberOfLines={1}>
+                  <View className="flex-row items-center justify-between">
+                    <Text className="font-bold text-gruvbox-yellow-dark" numberOfLines={1}>
+                      {item.itemName}
+                    </Text>
+                    <View className="ml-2 flex-row items-center">
+                      <TablerIconComponent name="eye" size={12} color="#b8bb26" />
+                      <Text
+                        className="ml-1"
+                        style={{
+                          fontSize: 10,
+                          color: '#b8bb26',
+                          fontWeight: 'bold',
+                        }}>
+                        {item.views}
+                      </Text>
+                    </View>
+                  </View>
+                  <Text className="text-xs text-gruvbox-dark-fg3" numberOfLines={1}>
                     ${item.price}
                   </Text>
                 </View>

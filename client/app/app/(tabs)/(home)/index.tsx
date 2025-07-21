@@ -24,6 +24,7 @@ import { StorageService } from '~/utils/storage';
 import { logout } from '~/api/auth';
 import { router } from 'expo-router';
 import { startChatAboutVibe } from '~/api/chat';
+import VibeMediaCarousel from '~/components/vibes/VibeMediaCarousel';
 // import Video from 'react-native-video'; // Uncomment if you support video
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -76,6 +77,7 @@ function VibeCard({
   onOpenComments,
   onMarkAsSold,
   isMine,
+  isEmailVerified,
 }: {
   vibe: Vibes;
   onLike: () => void;
@@ -84,8 +86,10 @@ function VibeCard({
   onOpenComments: () => void;
   onMarkAsSold: () => void;
   isMine: boolean;
+  isEmailVerified?: boolean;
 }) {
   const media = vibe.mediaFiles?.[0];
+  const [contactLoading, setContactLoading] = useState(false);
 
   return (
     <View
@@ -97,7 +101,24 @@ function VibeCard({
           height: CARD_HEIGHT,
           width: CARD_WIDTH,
         }}>
-        <VibeMedia media={media} />
+        {isMine && (
+          <View
+            className="absolute right-4 top-6 z-20 flex-row items-center rounded-full px-4 py-1"
+            style={{
+              backgroundColor: '#fabd2f',
+              shadowColor: '#000',
+              shadowOpacity: 0.15,
+              shadowRadius: 6,
+              shadowOffset: { width: 0, height: 2 },
+              elevation: 6,
+            }}>
+            <TablerIconComponent name="user" size={16} color="#282828" />
+            <Text className="ml-2 text-xs font-bold" style={{ color: '#282828', letterSpacing: 1 }}>
+              YOURS
+            </Text>
+          </View>
+        )}
+        <VibeMediaCarousel mediaFiles={vibe.mediaFiles || []} />
 
         {/* Overlay: Top */}
         <View className="absolute left-0 right-0 top-0 z-10 flex-row items-center px-4 pt-4">
@@ -121,15 +142,28 @@ function VibeCard({
                 />
               )}
             </View>
-            <Text className="text-xs text-gruvbox-dark-fg3">{vibe.location}</Text>
+            <Text className="text-xs font-bold text-gruvbox-dark-fg0">{vibe.location}</Text>
           </View>
         </View>
 
         {/* Overlay: Bottom */}
         <View className="absolute bottom-0 left-0 right-0 z-10 px-4 pb-4">
-          <View className="mb-1">
-            <Text className="text-xl font-bold text-gruvbox-yellow-dark">{vibe.itemName}</Text>
-            <Text className="text-gruvbox-dark-fg1">{vibe.description}</Text>
+          <View className="mb-1 flex-row items-center justify-between">
+            <Text className="text-xl font-bold text-gruvbox-yellow-dark" numberOfLines={1}>
+              {vibe.itemName}
+            </Text>
+            <View className="ml-2 flex-row items-center">
+              <TablerIconComponent name="eye" size={14} color="#b8bb26" />
+              <Text
+                className="ml-1"
+                style={{
+                  fontSize: 12,
+                  color: '#b8bb26', // Gruvbox green-dark, or pick another for contrast
+                  fontWeight: 'bold',
+                }}>
+                {vibe.views}
+              </Text>
+            </View>
           </View>
           <View className="mb-2 flex-row items-center">
             <Text className="text-lg font-bold text-gruvbox-green-dark">${vibe.price}</Text>
@@ -147,7 +181,18 @@ function VibeCard({
           </View>
           {/* Actions */}
           <View className="mt-2 flex-row items-center">
-            <TouchableOpacity className="mr-6 items-center" onPress={isLiked ? onUnlike : onLike}>
+            <TouchableOpacity
+              className="mr-6 items-center"
+              onPress={() => {
+                if (!isEmailVerified) {
+                  Alert.alert(
+                    'Email verification required',
+                    'Please verify your email address to like vibes.'
+                  );
+                  return;
+                }
+                isLiked ? onUnlike() : onLike();
+              }}>
               <TablerIconComponent name="heart" size={28} color={isLiked ? '#fb4934' : '#a89984'} />
               <Text className="text-xs text-gruvbox-light-bg0">{vibe.likesCount}</Text>
             </TouchableOpacity>
@@ -159,19 +204,46 @@ function VibeCard({
               <TablerIconComponent name="share" size={28} color="#83a598" />
               <Text className="text-xs text-gruvbox-light-bg0">Share</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              className="items-center"
-              onPress={async () => {
-                try {
-                  const res = await startChatAboutVibe(vibe.id);
-                  router.push(`/chat/${res.conversationId}`);
-                } catch (e) {
-                  // handle error
-                }
-              }}>
-              <TablerIconComponent name="send" size={28} color="#b8bb26" />
-              <Text className="text-xs text-gruvbox-light-bg0">Contact</Text>
-            </TouchableOpacity>
+            {!isMine && (
+              <TouchableOpacity
+                className="items-center"
+                onPress={async () => {
+                  if (!isEmailVerified) {
+                    Alert.alert(
+                      'Email verification required',
+                      'Please verify your email address to contact sellers or start a chat.'
+                    );
+                    return;
+                  }
+                  setContactLoading(true);
+                  try {
+                    const res = await startChatAboutVibe(vibe.id);
+                    router.push(`/(tabs)/(chat)/${res.conversationId}`);
+                  } catch (e: any) {
+                    // Handle API error for not verified, just in case
+                    if (e?.message?.includes('Email verification required')) {
+                      Alert.alert(
+                        'Email verification required',
+                        'Please verify your email address to contact sellers or start a chat.'
+                      );
+                    } else {
+                      Alert.alert(
+                        'Could not start chat',
+                        e?.message || 'Failed to start chat. Please try again later.'
+                      );
+                    }
+                  } finally {
+                    setContactLoading(false);
+                  }
+                }}
+                disabled={contactLoading}
+                style={{ opacity: contactLoading ? 0.6 : 1 }}>
+                <TablerIconComponent name="send" size={28} color="#b8bb26" />
+                <Text className="text-xs text-gruvbox-light-bg0">
+                  {contactLoading ? 'Loading...' : 'Contact'}
+                </Text>
+              </TouchableOpacity>
+            )}
 
             {isMine && vibe.status !== 'sold' && (
               <TouchableOpacity
@@ -215,11 +287,13 @@ export default function HomeScreen() {
           id: user.user_id,
           username: user.username,
           name: user.name,
-          profilePicture: null, // or user.profilePicture if you have it
-          isVerified: false, // or user.isVerified if you have it
+          profilePicture: null,
+          isVerified: user.isVerified ?? false,
+          isEmailVerified: user.isEmailVerified ?? false,
         });
         setCurrentUserId(user.user_id);
         setIsStaff(user.role === 'staff' || user.role === 'admin');
+        console.log('Current user data', user);
       }
     });
   }, []);
@@ -284,16 +358,37 @@ export default function HomeScreen() {
   if (!vibes.length) {
     return (
       <View className="flex-1 items-center justify-center bg-gruvbox-dark-bg0">
-        <Text className="text-lg text-gruvbox-yellow-dark">
+        <Text className="mb-6 text-lg text-gruvbox-yellow-dark">
           No vibes yet. Be the first to post!
         </Text>
+        {/* <View className="absolute bottom-24 right-6 z-50">
+          <TouchableOpacity
+            className="flex-row items-center rounded-xl bg-gruvbox-red px-4 py-2 shadow-lg"
+            onPress={async () => {
+              await logout();
+              router.replace('/(auth)/login');
+            }}>
+            <TablerIconComponent name="logout" size={18} color="#fbf1c7" />
+            <Text className="ml-2 font-bold text-gruvbox-light-bg0">Logout</Text>
+          </TouchableOpacity>
+        </View> */}
+        <TouchableOpacity
+          className="flex-row items-center rounded-xl bg-gruvbox-yellow-dark px-4 py-2"
+          onPress={fetchVibes}
+          disabled={isRefreshing}
+          style={{ opacity: isRefreshing ? 0.6 : 1 }}>
+          <TablerIconComponent name="refresh" size={20} color="#282828" />
+          <Text className="ml-2 font-bold text-gruvbox-dark-bg0">
+            {isRefreshing ? 'Refreshing...' : 'Refresh'}
+          </Text>
+        </TouchableOpacity>
       </View>
     );
   }
 
   return (
     <View className="flex-1 bg-gruvbox-dark-bg0">
-      <View className="absolute bottom-24 right-6 z-50">
+      {/* <View className="absolute bottom-24 right-6 z-50">
         <TouchableOpacity
           className="flex-row items-center rounded-xl bg-gruvbox-red px-4 py-2 shadow-lg"
           onPress={async () => {
@@ -303,7 +398,7 @@ export default function HomeScreen() {
           <TablerIconComponent name="logout" size={18} color="#fbf1c7" />
           <Text className="ml-2 font-bold text-gruvbox-light-bg0">Logout</Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
 
       <FlatList
         data={vibes}
@@ -330,6 +425,7 @@ export default function HomeScreen() {
                 Alert.alert('Error', e.message || 'Failed to mark as sold');
               }
             }}
+            isEmailVerified={currentUser?.isEmailVerified}
           />
         )}
         pagingEnabled
@@ -360,6 +456,7 @@ export default function HomeScreen() {
         currentUserId={currentUserId}
         isStaff={isStaff}
         currentUser={currentUser}
+        isEmailVerified={currentUser?.isEmailVerified}
       />
     </View>
   );

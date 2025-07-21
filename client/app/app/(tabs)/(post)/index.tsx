@@ -13,9 +13,10 @@ import * as ImagePicker from 'expo-image-picker';
 import TablerIconComponent from '~/components/icon';
 import { createVibe, uploadVibeMedia } from '~/api/vibes';
 import { router } from 'expo-router';
+import LocationPicker from '~/components/location/LocationPicker';
 
 const CATEGORIES = ['Electronics', 'Fashion', 'Books', 'Toys', 'Home', 'Other'];
-const CONDITIONS = ['new', 'like new', 'good', 'fair', 'poor'];
+const CONDITIONS = ['new', 'like-new', 'good', 'fair', 'poor'];
 
 export default function PostScreen() {
   const [itemName, setItemName] = useState('');
@@ -24,9 +25,11 @@ export default function PostScreen() {
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [condition, setCondition] = useState(CONDITIONS[0]);
   const [tags, setTags] = useState('');
-  const [location, setLocation] = useState('');
   const [media, setMedia] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [location, setLocation] = useState('');
+  const [selectedProvince, setSelectedProvince] = useState(null);
+  const [locationPickerVisible, setLocationPickerVisible] = useState(false);
 
   // Pick images/videos
   async function handlePickMedia() {
@@ -180,12 +183,22 @@ export default function PostScreen() {
         />
         {/* Location */}
         <Text className="mb-1 font-semibold text-gruvbox-dark-fg1">Location *</Text>
-        <TextInput
-          className="mb-3 rounded-xl bg-gruvbox-dark-bg2 px-4 py-3 text-gruvbox-light-bg0"
-          value={location}
-          onChangeText={setLocation}
-          placeholder="e.g. New York, NY"
-          placeholderTextColor="#a89984"
+        <TouchableOpacity
+          className="mb-3 rounded-xl bg-gruvbox-dark-bg2 px-4 py-3"
+          onPress={() => setLocationPickerVisible(true)}>
+          <Text
+            className={`text-base ${location ? 'text-gruvbox-light-bg0' : 'text-gruvbox-dark-fg4'}`}>
+            {location || 'Select your province/city'}
+          </Text>
+        </TouchableOpacity>
+        <LocationPicker
+          visible={locationPickerVisible}
+          onClose={() => setLocationPickerVisible(false)}
+          onSelect={(province) => {
+            setLocation(province.name);
+            setSelectedProvince(province);
+          }}
+          selectedLocation={selectedProvince}
         />
         {/* Media */}
         <Text className="mb-1 font-semibold text-gruvbox-dark-fg1">Photos / Videos</Text>

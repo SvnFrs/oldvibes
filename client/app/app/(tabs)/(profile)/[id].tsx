@@ -27,67 +27,79 @@ const VIBE_SIZE = (SCREEN_WIDTH - 32 - 12) / 2;
 
 export default function OtherProfileScreen() {
   const { id } = useLocalSearchParams();
-  const [profile, setProfile] = useState(null);
+  const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [vibes, setVibes] = useState([]);
+  const [vibes, setVibes] = useState<any[]>([]);
   const [followers, setFollowers] = useState(0);
   const [following, setFollowing] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
-  const [myId, setMyId] = useState('');
+  const [myId, setMyId] = useState<string>('');
 
   useEffect(() => {
-    StorageService.getUserData().then((user) => setMyId(user?.user_id));
+    StorageService.getUserData().then((user: any) => setMyId(user?.user_id ?? ''));
   }, []);
 
-  useEffect(() => {
-    fetchProfile();
-  }, [id]);
+  // id from useLocalSearchParams can be string | string[] | undefined
+  // We'll normalize it to a string or empty string
+  const normalizedId = typeof id === 'string' ? id : Array.isArray(id) ? (id[0] ?? '') : '';
 
-  async function fetchProfile() {
+  // fetchProfile must be stable for useEffect dependency
+  const fetchProfile = React.useCallback(async () => {
     setLoading(true);
     try {
-      const data = await getUserProfile(id);
+      const data = await getUserProfile(normalizedId);
       setProfile(data);
-      const vibesRes = await getUserVibes(id);
+      const vibesRes = await getUserVibes(normalizedId);
       setVibes(vibesRes.vibes || []);
-      const followersRes = await getFollowers(id);
+      const followersRes = await getFollowers(normalizedId);
       setFollowers(followersRes.count || 0);
-      const followingRes = await getFollowing(id);
+      const followingRes = await getFollowing(normalizedId);
       setFollowing(followingRes.count || 0);
       // Check if current user is following this user
       if (data.followers && myId) {
         setIsFollowing(data.followers.includes(myId));
       } else {
-        // Optionally, fetch a /is-following endpoint if you have one
         setIsFollowing(false);
       }
-    } catch (e) {
-      Alert.alert('Error', e.message || 'Failed to load profile');
+    } catch (e: unknown) {
+      let message = 'Failed to load profile';
+      if (e && typeof e === 'object' && 'message' in e && typeof (e as any).message === 'string') {
+        message = (e as any).message;
+      }
+      Alert.alert('Error', message);
     }
     setLoading(false);
     setRefreshing(false);
-  }
+  }, [normalizedId, myId]);
+
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
 
   async function handleFollow() {
     try {
       if (isFollowing) {
-        await unfollowUser(id);
+        await unfollowUser(normalizedId);
         setIsFollowing(false);
         setFollowers((f) => Math.max(0, f - 1));
       } else {
-        await followUser(id);
+        await followUser(normalizedId);
         setIsFollowing(true);
         setFollowers((f) => f + 1);
       }
-    } catch (e) {
-      Alert.alert('Error', e.message || 'Failed to update follow status');
+    } catch (e: unknown) {
+      let message = 'Failed to update follow status';
+      if (e && typeof e === 'object' && 'message' in e && typeof (e as any).message === 'string') {
+        message = (e as any).message;
+      }
+      Alert.alert('Error', message);
     }
   }
 
   if (loading) {
     return (
-      <View className="bg-gruvbox-dark-bg0 flex-1 items-center justify-center">
+      <View className="flex-1 items-center justify-center bg-gruvbox-dark-bg0">
         <ActivityIndicator size="large" color="#fabd2f" />
       </View>
     );
@@ -95,7 +107,7 @@ export default function OtherProfileScreen() {
 
   if (!profile) {
     return (
-      <View className="bg-gruvbox-dark-bg0 flex-1 items-center justify-center">
+      <View className="flex-1 items-center justify-center bg-gruvbox-dark-bg0">
         <Text className="text-gruvbox-yellow-dark">Failed to load profile.</Text>
       </View>
     );
@@ -103,7 +115,7 @@ export default function OtherProfileScreen() {
 
   return (
     <ScrollView
-      className="bg-gruvbox-dark-bg0 flex-1"
+      className="flex-1 bg-gruvbox-dark-bg0"
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
@@ -117,32 +129,37 @@ export default function OtherProfileScreen() {
       }>
       <ProfileCard
         profile={{
-          ...profile,
+          ...(profile ?? {}),
           followersCount: followers,
           followingCount: following,
           vibesCount: vibes.length,
         }}
-        isMe={myId === id}
+        isMe={myId === normalizedId}
         isFollowing={isFollowing}
         onFollow={handleFollow}
+        onEdit={() => {}}
+        onAvatarPress={() => {}}
+        onLogout={() => {}}
+        onFollowersPress={() => {}}
+        onFollowingPress={() => {}}
       />
 
       {/* User's Vibes */}
       <View className="mt-6 px-4">
-        <Text className="text-gruvbox-yellow-dark mb-3 text-lg font-bold">Vibes</Text>
+        <Text className="mb-3 text-lg font-bold text-gruvbox-yellow-dark">Vibes</Text>
         {vibes.length === 0 ? (
           <Text className="text-gruvbox-dark-fg3">No vibes yet.</Text>
         ) : (
           <FlatList
             data={vibes}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item: any) => item.id}
             numColumns={2}
             scrollEnabled={false}
             columnWrapperStyle={{ gap: 12 }}
             contentContainerStyle={{ gap: 12 }}
-            renderItem={({ item }) => (
+            renderItem={({ item }: { item: any }) => (
               <View
-                className="bg-gruvbox-dark-bg2 overflow-hidden rounded-2xl"
+                className="overflow-hidden rounded-2xl bg-gruvbox-dark-bg2"
                 style={{ width: VIBE_SIZE }}>
                 <Image
                   source={
@@ -154,10 +171,10 @@ export default function OtherProfileScreen() {
                   resizeMode="cover"
                 />
                 <View className="p-2">
-                  <Text className="text-gruvbox-yellow-dark font-bold" numberOfLines={1}>
+                  <Text className="font-bold text-gruvbox-yellow-dark" numberOfLines={1}>
                     {item.itemName}
                   </Text>
-                  <Text className="text-gruvbox-dark-fg3 text-xs" numberOfLines={1}>
+                  <Text className="text-xs text-gruvbox-dark-fg3" numberOfLines={1}>
                     ${item.price}
                   </Text>
                 </View>

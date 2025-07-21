@@ -28,6 +28,7 @@ export interface UserData {
   email: string;
   name: string;
   isEmailVerified: boolean;
+  isVerified?: boolean;
 }
 
 export interface LoginResponse {
@@ -40,6 +41,7 @@ export interface LoginResponse {
     username: string;
     role: UserRole;
     isEmailVerified: boolean;
+    isVerified?: boolean;
   };
 }
 
@@ -89,7 +91,9 @@ export const StorageService = {
         email: user.email,
         name: user.name,
         isEmailVerified: user.isEmailVerified,
+        isVerified: user.isVerified,
       };
+
       await AsyncStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(userData));
     } catch (error) {
       console.error('Error storing login data:', error);

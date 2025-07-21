@@ -136,7 +136,7 @@ export default function ChatRoomScreen() {
                     ? { uri: item.sender?.profilePicture || item.user?.profilePicture }
                     : require('~/assets/oldvibes-small.png')
                 }
-                className="border-gruvbox-yellow-dark mr-2 h-7 w-7 rounded-full border-2"
+                className="mr-2 h-7 w-7 rounded-full border-2 border-gruvbox-yellow-dark"
               />
             )}
             <View className={`rounded-full px-3 py-1 ${badgeColor}`}>
@@ -147,11 +147,11 @@ export default function ChatRoomScreen() {
         <View
           className={`max-w-[75%] px-4 py-2 shadow-sm ${
             isMe
-              ? 'bg-gruvbox-yellow-dark self-end rounded-2xl rounded-br-sm'
-              : 'bg-gruvbox-dark-bg2 self-start rounded-2xl rounded-bl-sm'
+              ? 'self-end rounded-2xl rounded-br-sm bg-gruvbox-yellow-dark'
+              : 'self-start rounded-2xl rounded-bl-sm bg-gruvbox-dark-bg2'
           }`}>
           <Text
-            className={`${isMe ? 'text-gruvbox-dark-bg0 font-bold' : 'text-gruvbox-light-bg0'}`}
+            className={`${isMe ? 'font-bold text-gruvbox-dark-bg0' : 'text-gruvbox-light-bg0'}`}
             style={{ fontSize: 15 }}>
             {item.content}
           </Text>
@@ -163,9 +163,9 @@ export default function ChatRoomScreen() {
   // --- HEADER ---
   function ChatHeader() {
     return (
-      <View className="bg-gruvbox-dark-bg1 border-gruvbox-dark-bg3 flex-row items-center border-b px-3 py-3 pt-12">
+      <View className="flex-row items-center border-b border-gruvbox-dark-bg3 bg-gruvbox-dark-bg1 px-3 py-3 pt-12">
         <TouchableOpacity
-          className="bg-gruvbox-dark-bg2 mr-3 rounded-full p-1"
+          className="mr-3 rounded-full bg-gruvbox-dark-bg2 p-1"
           onPress={() => router.back()}>
           <TablerIconComponent name="arrow-left" size={22} color="#fabd2f" />
         </TouchableOpacity>
@@ -176,15 +176,15 @@ export default function ChatRoomScreen() {
                 ? { uri: participant.profilePicture }
                 : require('~/assets/oldvibes-small.png')
             }
-            className="border-gruvbox-yellow-dark h-10 w-10 rounded-full border-2"
+            className="h-10 w-10 rounded-full border-2 border-gruvbox-yellow-dark"
           />
         )}
         <View className="ml-3 flex-1">
-          <Text className="text-gruvbox-yellow-dark text-base font-bold" numberOfLines={1}>
+          <Text className="text-base font-bold text-gruvbox-yellow-dark" numberOfLines={1}>
             {participant?.username || 'User'}
           </Text>
           {vibe && (
-            <Text className="text-gruvbox-dark-fg3 text-xs" numberOfLines={1}>
+            <Text className="text-xs text-gruvbox-dark-fg3" numberOfLines={1}>
               {vibe.itemName}
             </Text>
           )}
@@ -195,7 +195,7 @@ export default function ChatRoomScreen() {
 
   return (
     <KeyboardAvoidingView
-      className="bg-gruvbox-dark-bg0 flex-1"
+      className="flex-1 bg-gruvbox-dark-bg0"
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={0}>
       <ChatHeader />
@@ -211,12 +211,12 @@ export default function ChatRoomScreen() {
         onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
       />
       <View
-        className="bg-gruvbox-dark-bg1 border-gruvbox-dark-bg3 flex-row items-center border-t px-4 py-3"
+        className="flex-row items-center border-t border-gruvbox-dark-bg3 bg-gruvbox-dark-bg1 px-4 py-3"
         style={{
           paddingBottom: Platform.OS === 'ios' ? 24 : 8,
         }}>
         <TextInput
-          className="bg-gruvbox-dark-bg2 text-gruvbox-light-bg0 mr-2 flex-1 rounded-xl px-4 py-2"
+          className="mr-2 flex-1 rounded-xl bg-gruvbox-dark-bg2 px-4 py-2 text-gruvbox-light-bg0"
           value={input}
           onChangeText={setInput}
           placeholder="Type a message..."
@@ -224,7 +224,7 @@ export default function ChatRoomScreen() {
           multiline
         />
         <TouchableOpacity
-          className="bg-gruvbox-yellow-dark rounded-xl px-4 py-2"
+          className="rounded-xl bg-gruvbox-yellow-dark px-4 py-2"
           onPress={handleSend}
           disabled={!input.trim()}>
           <TablerIconComponent name="send" size={20} color="#282828" />

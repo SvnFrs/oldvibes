@@ -50,7 +50,7 @@ export interface Vibes {
     username: string;
     name: string;
     profilePicture: string | null;
-    isVerified: boolean;
+    isEmailVerified: boolean;
   };
   itemName: string;
   description: string;

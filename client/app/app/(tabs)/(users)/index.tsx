@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { RefreshControl } from 'react-native';
 import {
   View,
   Text,
@@ -8,14 +7,16 @@ import {
   ActivityIndicator,
   Alert,
   Dimensions,
+  RefreshControl,
 } from 'react-native';
+import { StorageService } from '~/utils/storage';
 import { getAllUsers, banUser, unbanUser } from '~/api/admin';
 import TablerIconComponent from '~/components/icon';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = SCREEN_WIDTH - 32;
 
-function UserCard({ user, onBan, onUnban, loading }: any) {
+function UserCard({ user, onBan, onUnban, loading, isSelf }: any) {
   return (
     <View
       className="mb-4 flex-row items-center rounded-2xl border border-gruvbox-dark-bg3 bg-gruvbox-dark-bg1/95 px-4 py-3 shadow-lg"
@@ -53,7 +54,7 @@ function UserCard({ user, onBan, onUnban, loading }: any) {
           Joined: {new Date(user.createdAt).toLocaleDateString()}
         </Text>
       </View>
-      {user.role !== 'admin' && (
+      {user.role !== 'admin' && !isSelf && (
         <View className="ml-4">
           {user.isActive ? (
             <TouchableOpacity
@@ -72,11 +73,19 @@ function UserCard({ user, onBan, onUnban, loading }: any) {
           )}
         </View>
       )}
+      {user.role !== 'admin' && isSelf && (
+        <View className="ml-4">
+          <View className="rounded-xl bg-gruvbox-dark-bg3 px-4 py-2 opacity-60">
+            <Text className="font-bold text-gruvbox-yellow-dark">You</Text>
+          </View>
+        </View>
+      )}
     </View>
   );
 }
 
 export default function UsersScreen() {
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -92,6 +101,10 @@ export default function UsersScreen() {
     }
     setLoading(false);
     setRefreshing(false);
+  }, []);
+
+  useEffect(() => {
+    StorageService.getUserData().then((user) => setCurrentUserId(user?.user_id || null));
   }, []);
 
   useEffect(() => {
@@ -170,6 +183,7 @@ export default function UsersScreen() {
               onBan={() => handleBan(item.id)}
               onUnban={() => handleUnban(item.id)}
               loading={banLoading === item.id}
+              isSelf={item.id === currentUserId}
             />
           )}
           ListEmptyComponent={
