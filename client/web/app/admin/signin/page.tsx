@@ -32,7 +32,7 @@ export default function AdminSignin() {
         return;
       }
       router.push("/admin/panel");
-    } catch (err) {
+    } catch {
       setError("Network error");
     }
   }

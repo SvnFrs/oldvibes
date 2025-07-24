@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Image from "next/image";
 import {
   IconUsers,
   IconUserCog,
@@ -8,7 +9,6 @@ import {
   IconMessageCircle,
   IconLogout,
   IconPlus,
-  IconEdit,
   IconTrash,
   IconBan,
   IconCheck,
@@ -80,11 +80,22 @@ const tabs = [
 ];
 
 // --- Main Admin Panel ---
+type User = {
+  id: string;
+  email: string;
+  username: string;
+  name: string;
+  role: string;
+  isActive?: boolean;
+  isEmailVerified?: boolean;
+  createdAt?: string;
+};
+
 export default function AdminPanel() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("staff");
-  const [error, setError] = useState("");
+  const [error] = useState("");
 
   // Auth check
   useEffect(() => {
@@ -176,8 +187,16 @@ export default function AdminPanel() {
 }
 
 // --- STAFF MANAGEMENT ---
+type Staff = {
+  id: string;
+  email: string;
+  username: string;
+  name: string;
+  role: string;
+};
+
 function StaffSection({ isAdmin }: { isAdmin: boolean }) {
-  const [staff, setStaff] = useState<any[]>([]);
+  const [staff, setStaff] = useState<Staff[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState({
@@ -203,7 +222,6 @@ function StaffSection({ isAdmin }: { isAdmin: boolean }) {
   // Add staff
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
     setSuccess("");
     try {
       const res = await fetch(API + "/admin/staff", {
@@ -348,10 +366,10 @@ function StaffSection({ isAdmin }: { isAdmin: boolean }) {
 
 // --- USER MANAGEMENT ---
 function UserSection() {
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [error, setError] = useState("");
+  const [error] = useState("");
   const [success, setSuccess] = useState("");
 
   // Fetch users
@@ -485,12 +503,31 @@ function UserSection() {
 }
 
 // --- VIBE MODERATION ---
+type MediaFile = {
+  url: string;
+  type: string;
+};
+
+type Vibe = {
+  id: string;
+  itemName: string;
+  user?: User;
+  price: number;
+  category: string;
+  condition: string;
+  createdAt?: string;
+  description?: string;
+  tags?: string[];
+  location?: string;
+  mediaFiles?: MediaFile[];
+};
+
 function VibeModerationSection() {
-  const [vibes, setVibes] = useState<any[]>([]);
+  const [vibes, setVibes] = useState<Vibe[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error] = useState("");
   const [success, setSuccess] = useState("");
-  const [selected, setSelected] = useState<any>(null);
+  const [selected, setSelected] = useState<Vibe | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
   // Fetch pending vibes
@@ -613,12 +650,14 @@ function VibeModerationSection() {
               <span className="font-bold">Location:</span> {selected.location}
             </div>
             <div className="mb-2 flex gap-2">
-              {selected.mediaFiles?.map((m: any, i: number) =>
+              {selected.mediaFiles?.map((m, i) =>
                 m.type === "image" ? (
-                  <img
+                  <Image
                     key={i}
                     src={m.url}
                     alt="media"
+                    width={80}
+                    height={80}
                     className="w-20 h-20 object-cover rounded border"
                   />
                 ) : (

@@ -2,8 +2,19 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+type User = {
+  id: string;
+  email: string;
+  username: string;
+  name: string;
+  role: string;
+  isActive?: boolean;
+  isEmailVerified?: boolean;
+  createdAt?: string;
+};
+
 export default function AdminPanel() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
