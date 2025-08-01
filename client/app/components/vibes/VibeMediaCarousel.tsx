@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { View, Image, FlatList, Dimensions, TouchableOpacity } from 'react-native';
-import Video from 'react-native-video';
+import { Video } from 'expo-av';
 import TablerIconComponent from '../icon';
 import { MediaFile } from '~/utils/type';
 
@@ -55,11 +55,10 @@ export default function VibeMediaCarousel({ mediaFiles }: { mediaFiles: MediaFil
               <Video
                 source={{ uri: item.url }}
                 style={{ width: MEDIA_WIDTH, height: MEDIA_HEIGHT, borderRadius: 24 }}
-                resizeMode="cover"
-                repeat
-                muted
-                controls={true}
-                paused={false}
+                isLooping
+                isMuted
+                useNativeControls
+                shouldPlay
               />
             );
           }

@@ -80,21 +80,29 @@ export async function uploadVibeMedia(vibeId, files) {
   const token = await StorageService.getAccessToken();
   const formData = new FormData();
   files.forEach((file, idx) => {
-    formData.append('media', {
+    // Use file.fileName or file.name if available, otherwise guess extension from type
+    let name = file.fileName || file.name;
+    if (!name) {
+      let ext = ".jpg";
+      if (file.type === "video/mp4") ext = ".mp4";
+      else if (file.type === "image/png") ext = ".png";
+      name = `media_${idx}${ext}`;
+    }
+    formData.append("media", {
       uri: file.uri,
-      name: file.name || `media_${idx}.jpg`,
-      type: file.type || 'image/jpeg',
+      name,
+      type: file.type || "image/jpeg",
     });
   });
   const res = await fetch(`${apiUrl}/vibes/${vibeId}/media`, {
-    method: 'POST',
+    method: "POST",
     headers: {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      // 'Content-Type': 'multipart/form-data', // Let RN set this
+      // Don't set Content-Type for FormData!
     },
     body: formData,
   });
-  if (!res.ok) throw new Error('Failed to upload media');
+  if (!res.ok) throw new Error("Failed to upload media");
   return await res.json();
 }
 

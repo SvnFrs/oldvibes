@@ -11,7 +11,6 @@ import {
   Dimensions,
 } from 'react-native';
 import { Link, useRouter } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
 import TablerIconComponent from '~/components/icon';
 import { login } from '~/api/auth';
 import { StorageService } from '~/utils/storage';
@@ -157,9 +156,8 @@ export default function LoginScreen() {
               <View className="mb-6">
                 <Text className="text-gruvbox-dark-fg1 mb-3 text-base font-semibold">Email</Text>
                 <View
-                  className={`bg-gruvbox-dark-bg2 flex-row items-center rounded-xl border-2 ${
-                    errors.email ? 'border-gruvbox-red' : 'border-gruvbox-dark-bg3'
-                  }`}>
+                  className={`bg-gruvbox-dark-bg2 flex-row items-center rounded-xl border-2 ${errors.email ? 'border-gruvbox-red' : 'border-gruvbox-dark-bg3'
+                    }`}>
                   <View className="p-4">
                     <TablerIconComponent name="user" size={20} color="#bdae93" />
                   </View>
@@ -192,9 +190,8 @@ export default function LoginScreen() {
               <View className="mb-6">
                 <Text className="text-gruvbox-dark-fg1 mb-3 text-base font-semibold">Password</Text>
                 <View
-                  className={`bg-gruvbox-dark-bg2 flex-row items-center rounded-xl border-2 ${
-                    errors.password ? 'border-gruvbox-red' : 'border-gruvbox-dark-bg3'
-                  }`}>
+                  className={`bg-gruvbox-dark-bg2 flex-row items-center rounded-xl border-2 ${errors.password ? 'border-gruvbox-red' : 'border-gruvbox-dark-bg3'
+                    }`}>
                   <View className="p-4">
                     <TablerIconComponent name="lock" size={20} color="#bdae93" />
                   </View>
@@ -245,9 +242,8 @@ export default function LoginScreen() {
 
               {/* Login Button */}
               <TouchableOpacity
-                className={`mb-6 items-center rounded-xl py-4 ${
-                  isLoading ? 'bg-gruvbox-yellow' : 'bg-gruvbox-yellow-dark'
-                }`}
+                className={`mb-6 items-center rounded-xl py-4 ${isLoading ? 'bg-gruvbox-yellow' : 'bg-gruvbox-yellow-dark'
+                  }`}
                 onPress={handleLogin}
                 disabled={isLoading}>
                 {isLoading ? (

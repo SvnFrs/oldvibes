@@ -25,7 +25,7 @@ import { logout } from '~/api/auth';
 import { router } from 'expo-router';
 import { startChatAboutVibe } from '~/api/chat';
 import VibeMediaCarousel from '~/components/vibes/VibeMediaCarousel';
-// import Video from 'react-native-video'; // Uncomment if you support video
+import Video from 'expo-av'; // Uncomment if you support video
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -321,7 +321,7 @@ export default function HomeScreen() {
     if (firstVisible && !viewedVibes.current.has(firstVisible.id)) {
       viewedVibes.current.add(firstVisible.id);
       // Increase view count
-      getVibeDetailAndIncreaseView(firstVisible.id).catch(() => {});
+      getVibeDetailAndIncreaseView(firstVisible.id).catch(() => { });
     }
   }).current;
 
@@ -335,7 +335,7 @@ export default function HomeScreen() {
       setVibes((prev) =>
         prev.map((v) => (v.id === id ? { ...v, likesCount: v.likesCount + 1 } : v))
       );
-    } catch {}
+    } catch { }
   };
   const handleUnlike = async (id: string) => {
     try {
@@ -344,7 +344,7 @@ export default function HomeScreen() {
       setVibes((prev) =>
         prev.map((v) => (v.id === id ? { ...v, likesCount: Math.max(0, v.likesCount - 1) } : v))
       );
-    } catch {}
+    } catch { }
   };
 
   if (isLoading) {

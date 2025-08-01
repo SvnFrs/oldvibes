@@ -1,6 +1,7 @@
 import multer from "multer";
 import { S3Client } from "@aws-sdk/client-s3";
 import multerS3 from "multer-s3";
+import path from "path";
 
 const s3 = new S3Client({
   region: process.env.AWS_REGION!,
@@ -16,7 +17,18 @@ export const uploadToS3 = multer({
     bucket: process.env.AWS_S3_BUCKET_NAME!,
     key: (req, file, cb) => {
       const timestamp = Date.now();
-      const filename = `${timestamp}-${file.originalname}`;
+      // Get extension from mimetype or originalname
+      let ext = path.extname(file.originalname);
+      if (!ext) {
+        // fallback: guess from mimetype
+        if (file.mimetype === "image/jpeg") ext = ".jpg";
+        else if (file.mimetype === "image/png") ext = ".png";
+        else if (file.mimetype === "video/mp4") ext = ".mp4";
+        else ext = "";
+      }
+      // Sanitize filename (remove spaces etc)
+      const baseName = path.basename(file.originalname, ext).replace(/\s+/g, "_");
+      const filename = `${timestamp}-${baseName}${ext}`;
       cb(null, `vibes/${filename}`);
     },
   }),
